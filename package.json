@@ -10,7 +10,8 @@
     "api": "php -S 0.0.0.0:8000 api/index.php",
     "build:deploy": "npm run build && git add . && git commit -m 'fix: build with base-href /BM-Monitor/ and permissions' && git push origin main",
     "package:pskz": "node scripts/package-pskz.js",
-    "build:root": "ng build --configuration production --base-href /"
+    "build:root": "ng build --configuration production --base-href /",
+    "deploy": "npm run build && git add . && git commit -m \"chore: auto deploy build\" && git push origin main"
   },
   "private": true,
   "dependencies": {
