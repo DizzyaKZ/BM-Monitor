@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4300 --open",
-    "build": "ng build --configuration production --base-href /BM-Monitor/ && node scripts/copy-to-root.js",
+    "build": "ng build --configuration production --base-href /BM-Monitor/ && node -e \"const fs=require('fs'),path=require('path');const b=fs.existsSync('dist/bm-monitor/browser')?'dist/bm-monitor/browser':(fs.existsSync('dist/bm-monitor')?'dist/bm-monitor':null);if(b&&fs.existsSync(b)){fs.readdirSync(b).forEach(f=>{const s=path.join(b,f);if(fs.statSync(s).isFile())fs.copyFileSync(s,f);});console.log('✔ Bundles copied to root for Plesk');}\"",
     "build:ps": "node scripts/package-pskz.js",
     "api": "php -S 0.0.0.0:8000 api/index.php",
     "build:deploy": "npm run build && git add . && git commit -m 'feat: update production bundles in root for Plesk' && git push origin main",
