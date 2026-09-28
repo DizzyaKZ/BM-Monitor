@@ -1,0 +1,20 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Перенаправление API запросов к PHP контроллеру
+  RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+
+  # Игнорировать существующие файлы и каталоги (картинки, стили, скрипты, api)
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Перенаправление всех остальных запросов на Angular index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Заголовки безопасности и UTF-8
+AddDefaultCharset UTF-8
+Header set X-Content-Type-Options "nosniff"
+Header set Access-Control-Allow-Origin "*"

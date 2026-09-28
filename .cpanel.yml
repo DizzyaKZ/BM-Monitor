@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/$(whoami)/public_html
+    - /bin/mkdir -p $DEPLOYPATH/api
+    - /bin/cp -R api/* $DEPLOYPATH/api/
+    - /bin/cp .htaccess $DEPLOYPATH/.htaccess
+    - if [ -d "dist/bm-monitor/browser" ]; then /bin/cp -R dist/bm-monitor/browser/* $DEPLOYPATH/; elif [ -d "dist/bm-monitor" ]; then /bin/cp -R dist/bm-monitor/* $DEPLOYPATH/; fi
+    - /bin/chmod 755 $DEPLOYPATH
+    - /bin/chmod 644 $DEPLOYPATH/.htaccess

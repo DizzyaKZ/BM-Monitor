@@ -5,6 +5,6 @@
   "files.trimTrailingWhitespace": true,
   "files.associations": {
     "*.sql": "sql",
-    "*.json": "json"
+    "*.php": "php"
   }
 }

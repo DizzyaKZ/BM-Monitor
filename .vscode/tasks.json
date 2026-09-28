@@ -2,26 +2,28 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "BM-Monitor: Start Server (Watch mode)",
-      "type": "shell",
-      "command": "node --watch server.js",
+      "type": "npm",
+      "script": "start",
       "isBackground": true,
       "problemMatcher": "$tsc-watch",
+      "label": "Angular: start (ng serve)",
       "group": {
         "kind": "build",
         "isDefault": true
       }
     },
     {
-      "label": "BM-Monitor: Trigger Daily Crawl",
-      "type": "shell",
-      "command": "curl -s -X POST http://localhost:4300/api/crawl | json_pp || echo 'Done'",
-      "problemMatcher": []
+      "type": "npm",
+      "script": "build",
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "label": "Angular: build (production)"
     },
     {
-      "label": "BM-Monitor: Sync Prices with Master ERP",
       "type": "shell",
-      "command": "curl -s -X POST http://localhost:4300/api/sync-to-erp -H 'Content-Type: application/json' -d '{\"erp_api_url\":\"http://localhost:4200/api/market-prices\"}' | json_pp",
+      "command": "node scripts/package-pskz.js",
+      "label": "PS.kz: Prepare Deployment Package",
       "problemMatcher": []
     }
   ]

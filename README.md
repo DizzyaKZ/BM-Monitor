@@ -1,31 +1,44 @@
-# MOOD Raw Material Price Monitor (BM-Monitor v1.2)
-**Автономный сервис ежедневного мониторинга цен сырья с фиксацией ссылок и журналом аудита**
+# MOOD Raw Material Price Monitor (BM-Monitor)
+**Специализированное Angular-приложение с бэкендом на PHP/MySQL для хостинга PS.kz**  
 *Холдинг MOOD GROUP (BEERMOOD.PUB / CHEESY MOOD / MEAT MOOD / BAKE MOOD / SPICY MOOD LAB)*  
 *Локация проекта: `/Users/pavelspitsyn/Documents/BM-Monitor`*  
 *Производственный объект: Казахстан, г. Алматы, ул. Жарокова 137/1 (ЖК «Арай», блок Г3)*
 
 ---
 
-## 1. Возможности системы
-1. **Первоисточники и ссылки на витрины:**
-   - Каждая зафиксированная котировка снабжена прямой ссылкой на страницу товара или карточку поставщика (Kaspi, Arbuz, METRO, Magnum, Satu, Алтын Орда, Зеленый Базар).
-2. **Журнал аудита получения цен (Acquisition Logs):**
-   - Точные метки времени (ISO timestamp с точностью до секунды).
-   - Метод фиксации (`AUTO_CRAWL` для онлайн-площадок, `MANUAL_ENTRY` для утренних звонков и накладных).
-   - HTTP-статусы ответов серверов и задержка отклика (ms).
-3. **Графики и волатильность:**
-   - Динамика средневзвешенной цены в Алматы за 7, 14 и 30 дней.
-   - Коридор колебаний цен Min/Max.
-4. **Интеграция с Master ERP:**
-   - Прямой перенос в один клик по REST API (`/api/market-prices`).
-   - Экспорт в SQL-дамп и CSV с сохранением ссылок на источники.
+### Архитектура системы
+1. **Frontend:** Angular 18 (Standalone-компоненты, Signals Reactive State, Fira Code / Plus Jakarta Sans, темная палитра `#0c0b0a`, `#181614`, `#e57c23`, `#27ae60`).
+2. **Backend:** PHP 8+ REST API (`api/index.php`) на базе PDO с prepared statements, CORS заголовками и UTF-8mb4.
+3. **Database:** MySQL 8.x / MariaDB (`database/schema.sql`) на сервере PS.kz.
+4. **Интеграция с Master ERP:** Передача цен по REST API в таблицу `raw_material_prices` с сохранением первоисточников (URLs) и журналов аудита (логов).
 
 ---
 
-## 2. Быстрый запуск в Visual Studio Code (macOS)
+### Быстрый старт в Visual Studio Code (macOS)
 ```bash
-code /Users/pavelspitsyn/Documents/BM-Monitor
+# 1. Перейдите в папку проекта:
 cd /Users/pavelspitsyn/Documents/BM-Monitor
-node --watch server.js
+
+# 2. Установите зависимости:
+npm install
+
+# 3. Запустите сервер разработки Angular:
+npm start
+# Приложение откроется по адресу: http://localhost:4300/
 ```
-Веб-интерфейс: **http://localhost:4300**
+
+---
+
+### Развертывание на хостинге PS.kz (cPanel / Apache)
+1. **Создание базы данных:**
+   - В cPanel PS.kz создайте базу данных (например, `beermood_monitor`) и пользователя с полными правами.
+   - Откройте **phpMyAdmin** и выполните импорт файла `database/schema.sql` (создадутся таблицы `raw_material_prices`, `market_sources`, `market_acquisition_logs` с начальными данными).
+2. **Настройка подключения:**
+   - Откройте `api/config.php` и укажите имя базы данных, пользователя и пароль от MySQL PS.kz.
+3. **Сборка и выгрузка:**
+   ```bash
+   npm run build
+   node scripts/package-pskz.js
+   ```
+   - Загрузите содержимое созданной папки `dist/bm-monitor/browser` (или сформированной `dist-pskz/`) в корневую папку сайта (`public_html`) на PS.kz.
+   - Файл `.htaccess` автоматически обеспечит маршрутизацию Angular HTML5 и направит `/api/*` к PHP контроллеру.

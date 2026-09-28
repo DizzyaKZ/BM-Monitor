@@ -1,8 +1,8 @@
 {
   "recommendations": [
+    "Angular.ng-template",
+    "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "formulahendry.auto-rename-tag",
-    "ritwickdey.liveserver",
-    "ms-azuretools.vscode-docker"
+    "bmewburn.vscode-intelephense-client"
   ]
 }
