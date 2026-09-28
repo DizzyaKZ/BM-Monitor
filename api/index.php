@@ -137,7 +137,7 @@ switch ($endpoint) {
     case 'reset':
     case 'init':
         if ($pdo) {
-            $count = seedCleanDatabase($pdo, $CLEAN_ITEMS);
+            $count = global $CLEAN_ITEMS; seedCleanDatabase($pdo, $CLEAN_ITEMS);
             sendJsonResponse([
                 'success' => true,
                 'status' => 'initialized',
@@ -280,6 +280,14 @@ switch ($endpoint) {
             try {
                 $stmt = $pdo->query("SELECT * FROM raw_material_prices");
                 $items = $stmt->fetchAll();
+                
+                // Если таблица пуста, автоматически инициализируем 43 проверенные позиции сырья
+                if (empty($items)) {
+                    global $CLEAN_ITEMS; seedCleanDatabase($pdo, $CLEAN_ITEMS);
+                    $stmt = $pdo->query("SELECT * FROM raw_material_prices");
+                    $items = $stmt->fetchAll();
+                }
+
                 $today = date('Y-m-d');
                 $updated = 0;
 
