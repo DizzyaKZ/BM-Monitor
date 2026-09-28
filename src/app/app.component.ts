@@ -6,6 +6,7 @@ import { PriceChartComponent } from './components/price-chart.component';
 import { PricesTableComponent } from './components/prices-table.component';
 import { AuditLogsModalComponent } from './components/audit-logs-modal.component';
 import { FastEntryModalComponent } from './components/fast-entry-modal.component';
+import { CrawlProgressModalComponent } from './components/crawl-progress-modal.component';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,8 @@ import { FastEntryModalComponent } from './components/fast-entry-modal.component
     PriceChartComponent,
     PricesTableComponent,
     AuditLogsModalComponent,
-    FastEntryModalComponent
+    FastEntryModalComponent,
+    CrawlProgressModalComponent
   ],
   template: `
     <div class="app-layout">
@@ -31,6 +33,7 @@ import { FastEntryModalComponent } from './components/fast-entry-modal.component
 
       <app-audit-logs-modal></app-audit-logs-modal>
       <app-fast-entry-modal></app-fast-entry-modal>
+      <app-crawl-progress-modal></app-crawl-progress-modal>
 
       <footer class="app-footer">
         <div class="container footer-flex">

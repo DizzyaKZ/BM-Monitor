@@ -78,3 +78,23 @@ export interface AcquisitionLog {
   notes?: string;
   [key: string]: any;
 }
+
+export interface CrawlLogEntry {
+  time: string;
+  code: string;
+  name: string;
+  source: string;
+  price: number;
+  url: string;
+  status: string;
+  ms: number;
+}
+
+export interface CrawlSummary {
+  total: number;
+  sourcesCount: number;
+  updatedLogsCount: number;
+  avgBasketDelta: number;
+  alerts: { code: string; name: string; oldPrice: number; newPrice: number; deltaPct: number }[];
+  completedAt: string;
+}
