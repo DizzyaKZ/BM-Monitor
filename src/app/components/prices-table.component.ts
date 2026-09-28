@@ -61,6 +61,7 @@ import { RawMaterialItem } from '../models/market-monitor.model';
               <th style="text-align:right;">Макс. цена</th>
               <th style="text-align:center;">24ч %</th>
               <th style="text-align:center;">Тренд 7д</th>
+              <th style="text-align:center;">Дата парсинга</th>
               <th>Выгодный источник</th>
               <th>Ссылка на источник</th>
               <th style="text-align:center;">Аудит</th>
@@ -93,6 +94,16 @@ import { RawMaterialItem } from '../models/market-monitor.model';
                 <span *ngIf="item.trend === 'DOWN'" class="badge badge-emerald">▼ СПАД {{ item.trend_pct }}%</span>
                 <span *ngIf="item.trend === 'STABLE'" class="badge badge-cyan">─ СТАБИЛЬНО</span>
               </td>
+              <td style="text-align:center; font-size:0.75rem; white-space:nowrap;">
+                <div class="font-mono" style="color:var(--text-primary); font-weight:600;">
+                  {{ formatFetchDate(item.last_fetched_at || item.last_updated) }}
+                </div>
+                <div style="font-size:0.68rem; margin-top:2px;">
+                  <span class="badge" [class.badge-emerald]="item.fetch_method === 'AUTO_CRAWL'" [class.badge-cyan]="item.fetch_method === 'MANUAL_ENTRY'">
+                    {{ item.fetch_method === 'AUTO_CRAWL' ? '🤖 АВТО' : '✍️ РУЧНОЙ' }}
+                  </span>
+                </div>
+              </td>
               <td>
                 <span style="font-size:0.75rem; color:var(--accent-gold);">★ {{ item.supplier }}</span>
               </td>
@@ -112,6 +123,23 @@ import { RawMaterialItem } from '../models/market-monitor.model';
             </tr>
           </tbody>
         </table>
+
+        <div *ngIf="svc.filteredMaterials().length === 0" class="empty-state-box">
+          <div style="font-size:2.2rem; margin-bottom:8px;">📭</div>
+          <h4 style="font-size:1.1rem; color:#fff; margin-bottom:6px;">Сводная таблица пуста (0 позиций)</h4>
+          <p style="font-size:0.8rem; color:var(--text-secondary); max-width:550px; margin:0 auto 16px auto;">
+            База данных полностью очищена. Вы можете загрузить 43 проверенные позиции сырья MOOD GROUP с актуальными котировками или ввести новые данные вручную.
+          </p>
+          <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn btn-emerald" (click)="onInitClean()">
+              ⚡ Загрузить проверенную базу (43 позиции)
+            </button>
+            <button class="btn btn-primary" (click)="svc.openFastEntryModal()">
+              ➕ Быстрый ввод котировки
+            </button>
+          </div>
+        </div>
+
       </div>
 
       <!-- ERP Card -->
@@ -201,6 +229,14 @@ import { RawMaterialItem } from '../models/market-monitor.model';
       border-radius: 4px;
     }
     .source-link:hover { color: #fff; background: var(--accent-cyan); }
+        .empty-state-box {
+      text-align: center;
+      padding: 40px 20px;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border-strong);
+      border-radius: 8px;
+      margin: 16px 0;
+    }
     .erp-sync-box {
       background: var(--bg-surface-elevated);
       border: 1px solid var(--border-subtle);
@@ -246,4 +282,24 @@ export class PricesTableComponent {
     this.svc.erpApiUrl.set(this.erpTargetUrl);
     await this.svc.syncWithErp();
   }
+
+  formatFetchDate(dateStr?: string): string {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const mins = String(d.getMinutes()).padStart(2, '0');
+      return `${day}.${month}.${d.getFullYear()} ${hours}:${mins}`;
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  async onInitClean() {
+    await this.svc.resetDatabase();
+  }
+
 }

@@ -93,7 +93,7 @@ export class MarketMonitorService {
       const res = await fetch(this.getApiUrl('prices'));
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           const sanitized = data.map((item: any) => ({
             ...item,
             current_cost_kzt: parseFloat(String(item.current_cost_kzt || 0)),
@@ -383,6 +383,22 @@ export class MarketMonitorService {
       localStorage.setItem('bm_monitor_prices', JSON.stringify(FALLBACK_PRICES));
     }
     this.loadHistory(this.selectedCode(), this.selectedDays());
+    return true;
+  }
+
+  async clearDatabase(): Promise<boolean> {
+    try {
+      const url = this.getApiUrl('clear');
+      await fetch(url, { method: 'POST' });
+    } catch (e) {
+      console.warn('API clear failed, clearing local state', e);
+    }
+    this.rawMaterials.set([]);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('bm_monitor_prices', '[]');
+    }
+    this.historyData.set([]);
+    this.acquisitionLogs.set([]);
     return true;
   }
 

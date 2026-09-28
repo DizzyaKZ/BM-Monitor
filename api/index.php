@@ -103,6 +103,26 @@ function seedCleanDatabase($pdo, $cleanItems) {
 }
 
 switch ($endpoint) {
+    case 'clear':
+    case 'wipe':
+        if ($pdo) {
+            $pdo->query("SET FOREIGN_KEY_CHECKS = 0;");
+            $pdo->query("TRUNCATE TABLE raw_material_prices;");
+            $pdo->query("TRUNCATE TABLE market_acquisition_logs;");
+            $pdo->query("TRUNCATE TABLE market_price_history;");
+            $pdo->query("SET FOREIGN_KEY_CHECKS = 1;");
+            sendJsonResponse([
+                'success' => true,
+                'status' => 'cleared',
+                'message' => 'Сводная таблица и база данных полностью очищены (0 записей).',
+                'items_count' => 0,
+                'facility' => 'г. Алматы, ул. Жарокова 137/1 (ЖК «Арай», блок Г3)'
+            ]);
+        } else {
+            sendJsonResponse(['error' => 'Database offline', 'details' => $lastDbError], 503);
+        }
+        break;
+
     case 'reset':
     case 'init':
         if ($pdo) {
