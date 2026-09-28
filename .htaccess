@@ -1,20 +1,22 @@
+DirectoryIndex index.html index.php
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase /
+  RewriteBase /BM-Monitor/
 
-  # Перенаправление API запросов к PHP контроллеру
+  # Редирект API запросов на PHP контроллер
   RewriteRule ^api/(.*)$ api/index.php [QSA,L]
 
-  # Игнорировать существующие файлы и каталоги (картинки, стили, скрипты, api)
+  # Если файл или папка существует, отдаем как есть
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Перенаправление всех остальных запросов на Angular index.html
+  # Все остальные запросы на index.html для Angular HTML5 роутинга
   RewriteRule ^ index.html [L]
 </IfModule>
 
-# Заголовки безопасности и UTF-8
+# Разрешение доступа и отключение листинга файлов
+Options -Indexes +FollowSymLinks
 AddDefaultCharset UTF-8
-Header set X-Content-Type-Options "nosniff"
 Header set Access-Control-Allow-Origin "*"

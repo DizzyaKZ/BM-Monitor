@@ -5,11 +5,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4300 --open",
-    "build": "ng build --configuration production",
+    "build": "ng build --configuration production --base-href /BM-Monitor/",
     "build:ps": "node scripts/package-pskz.js",
     "api": "php -S 0.0.0.0:8000 api/index.php",
-    "build:deploy": "npm run build && git add . && git commit -m 'chore: build production bundle for PS.kz' && git push origin main",
-    "package:pskz": "node scripts/package-pskz.js"
+    "build:deploy": "npm run build && git add . && git commit -m 'fix: build with base-href /BM-Monitor/ and permissions' && git push origin main",
+    "package:pskz": "node scripts/package-pskz.js",
+    "build:root": "ng build --configuration production --base-href /"
   },
   "private": true,
   "dependencies": {
