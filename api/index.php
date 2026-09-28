@@ -35,6 +35,16 @@ if (preg_match('#/api(?:/index\.php)?/(.+)#i', $path, $matches)) {
 
 $pdo = getDbConnection();
 
+// Автоматическое исправление недействующих доменов в MySQL (самовосстановление базы)
+if ($pdo) {
+    try {
+        $pdo->query("UPDATE raw_material_prices SET source_url = 'https://2gis.kz/almaty/firm/9429940000788647' WHERE source_url LIKE '%altynorda.kz%' OR supplier LIKE '%Алтын Орда%'");
+        $pdo->query("UPDATE raw_material_prices SET source_url = 'https://2gis.kz/almaty/firm/9429940000788648' WHERE source_url LIKE '%zelenybazar.kz%' OR supplier LIKE '%Зеленый Базар%'");
+        $pdo->query("UPDATE raw_material_prices SET source_url = 'https://bifi.kz/shop/vendor/sacco-italiya' WHERE (source_url LIKE '%biocom.kz%' OR supplier LIKE '%контракт%') AND category = 'MILK'");
+        $pdo->query("UPDATE raw_material_prices SET source_url = 'https://almaty.satu.kz/search?search_term=пищевые+ингредиенты' WHERE source_url LIKE '%biocom.kz%'");
+    } catch (Throwable $e) {}
+}
+
 switch ($endpoint) {
     case 'status':
         global $lastDbError;
