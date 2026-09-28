@@ -1,0 +1,47 @@
+[
+  {
+    "id": "altyn_orda",
+    "name": "Рынок «Алтын Орда» (Оптовый хаб)",
+    "type": "MARKET"
+  },
+  {
+    "id": "zeleny_bazar",
+    "name": "«Зеленый Базар» (Мясной/Молочный ряд)",
+    "type": "MARKET"
+  },
+  {
+    "id": "optovka",
+    "name": "«Оптовка» (Розыбакиева / Райымбека)",
+    "type": "MARKET"
+  },
+  {
+    "id": "metro_almaty",
+    "name": "METRO Cash & Carry Алматы (HoReCa B2B)",
+    "type": "HYPERMARKET"
+  },
+  {
+    "id": "magnum_almaty",
+    "name": "Magnum Cash & Carry (Опт/Доставка)",
+    "type": "HYPERMARKET"
+  },
+  {
+    "id": "arbuz_almaty",
+    "name": "Arbuz.kz (Онлайн-маркет)",
+    "type": "ONLINE"
+  },
+  {
+    "id": "kaspi_magaz",
+    "name": "Kaspi Магазин / Kaspi Продукты",
+    "type": "ONLINE"
+  },
+  {
+    "id": "satu_almaty",
+    "name": "Satu.kz B2B Поставщики Алматы",
+    "type": "ONLINE"
+  },
+  {
+    "id": "direct_suppliers",
+    "name": "Прямые контракты / Склады Алматы",
+    "type": "SUPPLIER"
+  }
+]

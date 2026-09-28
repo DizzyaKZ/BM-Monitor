@@ -1,0 +1,303 @@
+[
+  {
+    "code": "MILK-RAW-COW",
+    "category": "MILK",
+    "name": "Сырое коровье молоко (базис 3.8/3.2)",
+    "unit": "л",
+    "base_price": 285.0
+  },
+  {
+    "code": "MILK-GOAT",
+    "category": "MILK",
+    "name": "Сырое козье молоко фермерское",
+    "unit": "л",
+    "base_price": 850.0
+  },
+  {
+    "code": "CREAM-RAW-35",
+    "category": "MILK",
+    "name": "Сливки сырые 35% (для маскарпоне)",
+    "unit": "кг",
+    "base_price": 2400.0
+  },
+  {
+    "code": "CULTURE-SACCO-MS062",
+    "category": "MILK",
+    "name": "Закваска Sacco MS062 (100 UC)",
+    "unit": "упак",
+    "base_price": 14200.0
+  },
+  {
+    "code": "CULTURE-SACCO-MS064",
+    "category": "MILK",
+    "name": "Закваска Sacco MS064 (творог/сыр 100 UC)",
+    "unit": "упак",
+    "base_price": 14600.0
+  },
+  {
+    "code": "ENZYME-RENNET",
+    "category": "MILK",
+    "name": "Сычужный фермент Microclerici (100 мл)",
+    "unit": "флак",
+    "base_price": 3800.0
+  },
+  {
+    "code": "CALCIUM-CHLORIDE",
+    "category": "MILK",
+    "name": "Кальций хлористый пищевой E509 (фарм)",
+    "unit": "кг",
+    "base_price": 1250.0
+  },
+  {
+    "code": "SALT-CHEESE",
+    "category": "MILK",
+    "name": "Соль вакуумная мелкая Экстра (чистая)",
+    "unit": "кг",
+    "base_price": 180.0
+  },
+  {
+    "code": "BEEF-TENDERLOIN",
+    "category": "MEAT",
+    "name": "Говядина вырезка охлажденная (Алматы)",
+    "unit": "кг",
+    "base_price": 5400.0
+  },
+  {
+    "code": "BEEF-ROUND-TOP",
+    "category": "MEAT",
+    "name": "Говядина тазобедренная мякоть (окорок)",
+    "unit": "кг",
+    "base_price": 3650.0
+  },
+  {
+    "code": "BEEF-SHOULDER",
+    "category": "MEAT",
+    "name": "Говядина лопатка б/к",
+    "unit": "кг",
+    "base_price": 3400.0
+  },
+  {
+    "code": "BEEF-TRIM-8020",
+    "category": "MEAT",
+    "name": "Тримминг говяжий 80/20 (колбасный)",
+    "unit": "кг",
+    "base_price": 2950.0
+  },
+  {
+    "code": "PORK-HALF",
+    "category": "MEAT",
+    "name": "Свинина в полутушах (1-я категория)",
+    "unit": "кг",
+    "base_price": 2100.0
+  },
+  {
+    "code": "PORK-LEG",
+    "category": "MEAT",
+    "name": "Свинина окорок б/к охл.",
+    "unit": "кг",
+    "base_price": 2750.0
+  },
+  {
+    "code": "PORK-BELLY",
+    "category": "MEAT",
+    "name": "Свинина грудинка б/к (на бекон)",
+    "unit": "кг",
+    "base_price": 2600.0
+  },
+  {
+    "code": "PORK-FATBACK",
+    "category": "MEAT",
+    "name": "Шпик свиной хребтовый твердый",
+    "unit": "кг",
+    "base_price": 2200.0
+  },
+  {
+    "code": "HORSE-ZHAYA",
+    "category": "MEAT",
+    "name": "Конина Жая охлажденная (высший сорт)",
+    "unit": "кг",
+    "base_price": 4600.0
+  },
+  {
+    "code": "HORSE-KAZY-RAW",
+    "category": "MEAT",
+    "name": "Конина реберная часть (на Казы)",
+    "unit": "кг",
+    "base_price": 4900.0
+  },
+  {
+    "code": "HORSE-ZHAL",
+    "category": "MEAT",
+    "name": "Конина Жал подгривный жир",
+    "unit": "кг",
+    "base_price": 3900.0
+  },
+  {
+    "code": "CASING-PORK-3840",
+    "category": "MEAT",
+    "name": "Черева свиная 38/40 мм (пучок 91.4м)",
+    "unit": "пучок",
+    "base_price": 8900.0
+  },
+  {
+    "code": "CASING-SHEEP-2224",
+    "category": "MEAT",
+    "name": "Черева баранья 22/24 мм (сосиски/пивчики)",
+    "unit": "пучок",
+    "base_price": 11500.0
+  },
+  {
+    "code": "NITRITE-SALT-06",
+    "category": "MEAT",
+    "name": "Нитритная соль 0.6% Suprasel",
+    "unit": "кг",
+    "base_price": 420.0
+  },
+  {
+    "code": "WOOD-CHIPS-ALDER",
+    "category": "MEAT",
+    "name": "Щепа ольховая 6-8 мм для Ижицы (15 кг)",
+    "unit": "мешок",
+    "base_price": 4500.0
+  },
+  {
+    "code": "FLOUR-WHEAT-PREM",
+    "category": "FLOUR",
+    "name": "Мука пшеничная высший сорт (W 280-320)",
+    "unit": "кг",
+    "base_price": 310.0
+  },
+  {
+    "code": "FLOUR-WHEAT-1ST",
+    "category": "FLOUR",
+    "name": "Мука пшеничная 1 сорт (хлебопекарная)",
+    "unit": "кг",
+    "base_price": 245.0
+  },
+  {
+    "code": "FLOUR-WHOLEGRAIN",
+    "category": "FLOUR",
+    "name": "Мука пшеничная цельнозерновая обойная",
+    "unit": "кг",
+    "base_price": 450.0
+  },
+  {
+    "code": "FLOUR-RYE-PEELED",
+    "category": "FLOUR",
+    "name": "Мука ржаная обдирная (на Тартин/Бородинский)",
+    "unit": "кг",
+    "base_price": 290.0
+  },
+  {
+    "code": "FLOUR-SEMOLA-DURUM",
+    "category": "FLOUR",
+    "name": "Мука Семола дурум (твердая пшеница)",
+    "unit": "кг",
+    "base_price": 780.0
+  },
+  {
+    "code": "YEAST-COMPRESSED",
+    "category": "FLOUR",
+    "name": "Дрожжи прессованные хлебопекарные",
+    "unit": "кг",
+    "base_price": 680.0
+  },
+  {
+    "code": "MALT-RED-FERM",
+    "category": "FLOUR",
+    "name": "Солод ржаной ферментированный красный",
+    "unit": "кг",
+    "base_price": 720.0
+  },
+  {
+    "code": "BUTTER-825",
+    "category": "FLOUR",
+    "name": "Масло сливочное 82.5% ГОСТ (монолит)",
+    "unit": "кг",
+    "base_price": 3600.0
+  },
+  {
+    "code": "SEEDS-SESAME",
+    "category": "FLOUR",
+    "name": "Кунжут белый очищенный индийский",
+    "unit": "кг",
+    "base_price": 1850.0
+  },
+  {
+    "code": "SEEDS-PUMPKIN",
+    "category": "FLOUR",
+    "name": "Семена тыквы очищенные",
+    "unit": "кг",
+    "base_price": 2800.0
+  },
+  {
+    "code": "SPICE-PEPPER-BLACK",
+    "category": "SPICE",
+    "name": "Перец черный горошек (Вьетнам 550 г/л)",
+    "unit": "кг",
+    "base_price": 4200.0
+  },
+  {
+    "code": "SPICE-CORIANDER",
+    "category": "SPICE",
+    "name": "Кориандр семена отборные",
+    "unit": "кг",
+    "base_price": 1150.0
+  },
+  {
+    "code": "SPICE-CUMIN-ZIRA",
+    "category": "SPICE",
+    "name": "Зира (кумин) отборная иранская",
+    "unit": "кг",
+    "base_price": 4500.0
+  },
+  {
+    "code": "SPICE-PAPRIKA-SMOKED",
+    "category": "SPICE",
+    "name": "Паприка копченая Pimenton ASTA 120",
+    "unit": "кг",
+    "base_price": 3800.0
+  },
+  {
+    "code": "SPICE-PAPRIKA-SWEET",
+    "category": "SPICE",
+    "name": "Паприка сладкая молотая ASTA 140",
+    "unit": "кг",
+    "base_price": 2700.0
+  },
+  {
+    "code": "SPICE-GARLIC-GRAN",
+    "category": "SPICE",
+    "name": "Чеснок сушеный гранулированный 40-60",
+    "unit": "кг",
+    "base_price": 2100.0
+  },
+  {
+    "code": "SPICE-CHILI-FLAKES",
+    "category": "SPICE",
+    "name": "Перец чили дробленый / кайенский острый",
+    "unit": "кг",
+    "base_price": 2900.0
+  },
+  {
+    "code": "SPICE-NUTMEG-GROUND",
+    "category": "SPICE",
+    "name": "Мускатный орех молотый высший сорт",
+    "unit": "кг",
+    "base_price": 7900.0
+  },
+  {
+    "code": "SPICE-CARDAMOM",
+    "category": "SPICE",
+    "name": "Кардамон зеленый цельный отборный",
+    "unit": "кг",
+    "base_price": 18500.0
+  },
+  {
+    "code": "SPICE-GARAM-MASALA",
+    "category": "SPICE",
+    "name": "Смесь Spicy Mood Garam Masala (авторская)",
+    "unit": "кг",
+    "base_price": 6400.0
+  }
+]

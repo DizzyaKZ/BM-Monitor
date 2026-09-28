@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🚀 Запуск сервера BM-Monitor (Node.js)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "restart": true,
+      "runtimeArgs": [
+        "--watch"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "🌐 Открыть BM-Monitor в Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:4300",
+      "webRoot": "${workspaceFolder}/public"
+    }
+  ]
+}

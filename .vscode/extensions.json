@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "formulahendry.auto-rename-tag",
+    "ritwickdey.liveserver",
+    "ms-azuretools.vscode-docker"
+  ]
+}

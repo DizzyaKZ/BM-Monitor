@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>MOOD Price Intelligence • Мониторинг сырья в Алматы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0c0b0a;
+      --bg-surface: #141311;
+      --bg-surface-elevated: #1d1b18;
+      --bg-card: #181614;
+      --border-subtle: #2b2723;
+      --border-strong: #3f3933;
+      --text-primary: #f5efe8;
+      --text-secondary: #a39a90;
+      --text-muted: #6e6760;
+      --accent-amber: #e57c23;
+      --accent-amber-glow: rgba(229, 124, 35, 0.22);
+      --accent-gold: #f39c12;
+      --accent-copper: #d35400;
+      --accent-emerald: #27ae60;
+      --accent-emerald-soft: rgba(39, 174, 96, 0.16);
+      --accent-cyan: #00b4d8;
+      --accent-cyan-soft: rgba(0, 180, 216, 0.15);
+      --accent-ruby: #e74c3c;
+      --accent-ruby-soft: rgba(231, 76, 60, 0.16);
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-mono { font-family: var(--font-mono); }
+
+    .container { max-width: 1680px; margin: 0 auto; padding: 0 24px; }
+
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .logo-area { display: flex; align-items: center; gap: 14px; }
+    .brand-badge {
+      background: var(--accent-amber);
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.1rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .logo-text h1 { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .logo-text p { font-size: 0.78rem; color: var(--text-secondary); }
+
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--accent-amber); color: #fff; box-shadow: 0 2px 8px var(--accent-amber-glow); }
+    .btn-primary:hover { background: #f08933; transform: translateY(-1px); }
+    .btn-outline { background: transparent; color: var(--text-primary); border-color: var(--border-strong); }
+    .btn-outline:hover { border-color: var(--accent-amber); color: var(--accent-amber); background: var(--accent-amber-glow); }
+    .btn-emerald { background: var(--accent-emerald-soft); color: var(--accent-emerald); border-color: var(--accent-emerald); }
+    .btn-emerald:hover { background: var(--accent-emerald); color: #fff; }
+    .btn-cyan { background: var(--accent-cyan-soft); color: var(--accent-cyan); border-color: var(--accent-cyan); }
+    .btn-cyan:hover { background: var(--accent-cyan); color: #fff; }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--accent-amber);
+    }
+    .kpi-card.emerald::before { background: var(--accent-emerald); }
+    .kpi-card.cyan::before { background: var(--accent-cyan); }
+    .kpi-card.gold::before { background: var(--accent-gold); }
+
+    .kpi-title { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); font-weight: 700; }
+    .kpi-val { font-size: 1.6rem; font-weight: 700; color: #fff; margin: 6px 0 2px; }
+    .kpi-sub { font-size: 0.78rem; color: var(--text-secondary); }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 9px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .tab-btn:hover { color: #fff; border-color: var(--border-strong); }
+    .tab-btn.active {
+      background: var(--accent-amber-glow);
+      color: var(--accent-amber);
+      border-color: var(--accent-amber);
+    }
+
+    .chart-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .chart-title h2 { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .chart-title p { font-size: 0.78rem; color: var(--text-secondary); }
+
+    .chart-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    select, input[type="text"], input[type="number"], input[type="date"] {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      outline: none;
+    }
+    select:focus, input:focus { border-color: var(--accent-amber); }
+
+    .chart-canvas-box {
+      width: 100%;
+      height: 330px;
+      position: relative;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px;
+    }
+    canvas { width: 100% !important; height: 100% !important; display: block; }
+
+    .sources-legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      font-size: 0.75rem;
+    }
+    .source-chip {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 3px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+    }
+    .source-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+    .table-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 40px;
+    }
+    .table-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .search-input { width: 340px; max-width: 100%; }
+
+    .table-responsive { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+      text-align: left;
+    }
+    th {
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-strong);
+      font-weight: 700;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+    tr:hover td { background: var(--bg-surface-elevated); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .badge-amber { background: var(--accent-amber-glow); color: var(--accent-amber); border: 1px solid var(--accent-amber); }
+    .badge-emerald { background: var(--accent-emerald-soft); color: var(--accent-emerald); border: 1px solid var(--accent-emerald); }
+    .badge-cyan { background: var(--accent-cyan-soft); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); }
+    .badge-ruby { background: var(--accent-ruby-soft); color: var(--accent-ruby); border: 1px solid var(--accent-ruby); }
+
+    .trend-up { color: var(--accent-ruby); font-weight: 700; }
+    .trend-down { color: var(--accent-emerald); font-weight: 700; }
+    .trend-stable { color: var(--text-muted); }
+
+    .source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-size: 0.76rem;
+      padding: 2px 6px;
+      background: var(--accent-cyan-soft);
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+    .source-link:hover { color: #fff; background: var(--accent-cyan); }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      width: 560px;
+      max-width: 94%;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    }
+    .modal-box-large {
+      width: 980px;
+      max-width: 95%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+    .modal-header h3 { font-size: 1.15rem; color: #fff; }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; }
+    .close-btn:hover { color: #fff; }
+
+    .modal-body {
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 6px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 5px; }
+    .form-group select, .form-group input { width: 100%; }
+
+    .erp-sync-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .erp-info h4 { font-size: 0.9rem; color: #fff; margin-bottom: 2px; }
+    .erp-info p { font-size: 0.75rem; color: var(--text-secondary); }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--accent-emerald);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      display: none;
+      z-index: 2000;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 20px 0;
+      background: var(--bg-surface);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .footer-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container header-inner">
+      <div class="logo-area">
+        <span class="brand-badge">MOOD</span>
+        <div class="logo-text">
+          <h1>Price Intelligence & Raw Material Monitor</h1>
+          <p>Алматы • Оптовые рынки, сети, онлайн-площадки, поставщики (с ссылками и логами)</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" onclick="openSystemLogsModal()">
+          📜 Журнал аудита логов
+        </button>
+        <button class="btn btn-primary" onclick="openFastEntryModal()">
+          ⚡ Быстрый ввод котировки
+        </button>
+        <button class="btn btn-cyan" onclick="triggerCrawl()">
+          🔄 Запустить автопарсинг
+        </button>
+        <button class="btn btn-emerald" onclick="syncWithMasterErp()">
+          🚀 Перенос в Master ERP
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Top KPI Strip -->
+    <div class="kpi-grid">
+      <div class="kpi-card gold">
+        <span class="kpi-title">Всего позиций на мониторинге</span>
+        <div class="kpi-val font-mono" id="kpiTotalItems">43</div>
+        <div class="kpi-sub">Молочка, Мясо, Хлеб, Специи</div>
+      </div>
+      <div class="kpi-card" id="kpiInflationCard">
+        <span class="kpi-title">Суточная динамика корзины (24ч)</span>
+        <div class="kpi-val font-mono" id="kpiAvgInflation">+0.14%</div>
+        <div class="kpi-sub" id="kpiInflationSub">Среднее колебание цен в Алматы</div>
+      </div>
+      <div class="kpi-card cyan">
+        <span class="kpi-title">Ключевые источники котировок</span>
+        <div class="kpi-val font-mono">9 каналов</div>
+        <div class="kpi-sub">Прямые ссылки на витрины и прайсы</div>
+      </div>
+      <div class="kpi-card emerald">
+        <span class="kpi-title">Интеграция с Master ERP</span>
+        <div class="kpi-val font-mono" id="kpiErpStatus">Синхронизировано</div>
+        <div class="kpi-sub">Таблица <code>raw_material_prices</code></div>
+      </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="setCategory('ALL', this)">🌟 Все сырьевые группы (43)</button>
+      <button class="tab-btn" onclick="setCategory('MILK', this)">🥛 Молочное производство (CHEESY)</button>
+      <button class="tab-btn" onclick="setCategory('MEAT', this)">🥩 Мясное производство (MEAT)</button>
+      <button class="tab-btn" onclick="setCategory('FLOUR', this)">🍞 Хлебное производство (BAKE)</button>
+      <button class="tab-btn" onclick="setCategory('SPICE', this)">🌶️ Специи & Пряности (SPICY LAB)</button>
+    </div>
+
+    <!-- Chart Panel -->
+    <section class="chart-panel">
+      <div class="chart-header">
+        <div class="chart-title">
+          <h2 id="chartItemTitle">📈 Динамика средневзвешенной цены в Алматы</h2>
+          <p id="chartItemSubtitle">Временной ряд, диапазон Min/Max и сравнение цен по оптовым каналам</p>
+        </div>
+        <div class="chart-controls">
+          <label style="font-size:0.78rem; color:var(--text-secondary);">Сырье:</label>
+          <select id="itemSelect" onchange="onSelectItemChange(this.value)">
+          </select>
+          <label style="font-size:0.78rem; color:var(--text-secondary); margin-left:8px;">Период:</label>
+          <select id="daysSelect" onchange="onDaysChange(this.value)">
+            <option value="7">7 дней</option>
+            <option value="14">14 дней</option>
+            <option value="30" selected>30 дней</option>
+          </select>
+          <button class="btn btn-outline" style="padding:6px 10px; font-size:0.78rem; margin-left:8px;" onclick="openItemLogs(selectedCode)">
+            📜 Логи позиции
+          </button>
+        </div>
+      </div>
+
+      <div class="chart-canvas-box">
+        <canvas id="priceCanvas"></canvas>
+      </div>
+
+      <div class="sources-legend" id="sourcesLegend">
+        <span class="source-chip"><span class="source-dot" style="background:#e57c23;"></span> Средневзвешенная цена (KZT)</span>
+        <span class="source-chip"><span class="source-dot" style="background:#27ae60;"></span> Рынок «Алтын Орда»</span>
+        <span class="source-chip"><span class="source-dot" style="background:#00b4d8;"></span> METRO Cash & Carry</span>
+        <span class="source-chip"><span class="source-dot" style="background:#f39c12;"></span> «Зеленый Базар»</span>
+        <span class="source-chip"><span class="source-dot" style="background:#9b59b6;"></span> Прямой поставщик</span>
+      </div>
+    </section>
+
+    <!-- Table Panel -->
+    <section class="table-panel">
+      <div class="table-top">
+        <div>
+          <h3 style="font-size:1.1rem; color:#fff;">📋 Сводная таблица рыночных цен с первоисточниками (г. Алматы)</h3>
+          <p style="font-size:0.75rem; color:var(--text-secondary);">Кликните по ссылке источника для перехода на страницу предложения или нажмите «Лог» для просмотра аудита.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="text" class="search-input" id="searchFilter" placeholder="Поиск сырья по названию или коду..." oninput="renderTable()">
+          <a class="btn btn-outline" href="/api/export/csv" download="market_prices_almaty.csv">📥 Скачать CSV с ссылками</a>
+          <a class="btn btn-outline" href="/api/export/sql" download="raw_material_prices_sync.sql">💾 SQL Дамп</a>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Код</th>
+              <th>Категория</th>
+              <th>Наименование сырья</th>
+              <th>Ед.</th>
+              <th style="text-align:right;">Мин. в Алматы</th>
+              <th style="text-align:right;">Средняя цена</th>
+              <th style="text-align:right;">Макс. цена</th>
+              <th style="text-align:center;">24ч %</th>
+              <th style="text-align:center;">Тренд 7д</th>
+              <th>Выгодный источник</th>
+              <th>Ссылка на источник</th>
+              <th style="text-align:center;">Аудит</th>
+            </tr>
+          </thead>
+          <tbody id="pricesTableBody">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ERP Export Box -->
+      <div class="erp-sync-box">
+        <div class="erp-info">
+          <h4>🔗 Прямая интеграция с BEERMOOD Master ERP (PS.kz / Localhost)</h4>
+          <p>Синхронизация передает актуальные котировки вместе со ссылками на источники в таблицу <code>raw_material_prices</code>.</p>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="erpApiUrl" value="http://localhost:4200/api/market-prices" style="width:280px; font-size:0.78rem;">
+          <button class="btn btn-emerald" onclick="syncWithMasterErp()">
+            ⚡ Отправить котировки в ERP
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Fast Entry -->
+  <div class="modal-overlay" id="fastEntryModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>⚡ Экспресс-ввод утренней цены</h3>
+        <button class="close-btn" onclick="closeFastEntryModal()">&times;</button>
+      </div>
+      <form id="fastEntryForm" onsubmit="submitFastEntry(event)">
+        <div class="form-group">
+          <label>Выберите позицию сырья:</label>
+          <select id="modalItemSelect" required></select>
+        </div>
+        <div class="form-group">
+          <label>Источник / Торговая точка (Алматы):</label>
+          <select id="modalSourceSelect" required>
+            <option value="altyn_orda">Рынок «Алтын Орда» (Оптовые ряды)</option>
+            <option value="zeleny_bazar">«Зеленый Базар» (Мясной/Молочный павильон)</option>
+            <option value="optovka">«Оптовка» (Розыбакиева / Райымбека)</option>
+            <option value="metro_almaty">METRO Cash & Carry (HoReCa B2B)</option>
+            <option value="magnum_almaty">Magnum Cash & Carry</option>
+            <option value="arbuz_almaty">Arbuz.kz</option>
+            <option value="kaspi_magaz">Kaspi Магазин</option>
+            <option value="satu_almaty">Satu.kz Поставщики</option>
+            <option value="direct_suppliers">Прямой поставщик (по счету/накладной)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Зафиксированная цена (KZT):</label>
+          <input type="number" id="modalPriceInput" step="0.1" required placeholder="Например: 2950">
+        </div>
+        <div class="form-group">
+          <label>Прямая ссылка на источник / товар (URL):</label>
+          <input type="text" id="modalUrlInput" placeholder="https://kaspi.kz/... или оставьте пустым для автогенерации">
+        </div>
+        <div class="form-group">
+          <label>Дата котировки:</label>
+          <input type="date" id="modalDateInput" required>
+        </div>
+        <div class="form-group">
+          <label>Примечание / Номер накладной:</label>
+          <input type="text" id="modalNotesInput" placeholder="Например: Счет №142, опт от 100 кг">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+          <button type="button" class="btn btn-outline" onclick="closeFastEntryModal()">Отмена</button>
+          <button type="submit" class="btn btn-primary">Зафиксировать котировку</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Acquisition Audit Log -->
+  <div class="modal-overlay" id="logsModal">
+    <div class="modal-box modal-box-large">
+      <div class="modal-header">
+        <div>
+          <h3 id="logsModalTitle">📜 Журнал аудита получения цен</h3>
+          <p id="logsModalSubtitle" style="font-size:0.75rem; color:var(--text-secondary);">Точные отметки времени, методы фиксации, HTTP-статусы и первоисточники</p>
+        </div>
+        <button class="close-btn" onclick="closeLogsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table style="width:100%;">
+          <thead>
+            <tr>
+              <th>Время (Timestamp)</th>
+              <th>Сырье</th>
+              <th>Источник</th>
+              <th style="text-align:right;">Цена (₸)</th>
+              <th style="text-align:center;">Метод</th>
+              <th style="text-align:center;">Статус</th>
+              <th>Ссылка на источник</th>
+            </tr>
+          </thead>
+          <tbody id="logsTableBody">
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+        <button class="btn btn-outline" onclick="closeLogsModal()">Закрыть журнал</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toastMessage"></div>
+
+  <footer>
+    <div class="container footer-flex">
+      <div>
+        <strong>MOOD Raw Material Price Intelligence</strong> • Автономный сервис мониторинга
+      </div>
+      <div>
+        г. Алматы, ул. Жарокова 137/1 (ЖК «Арай») • Холдинг MOOD GROUP
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let allPrices = [];
+    let activeCategory = 'ALL';
+    let selectedCode = 'MILK-RAW-COW';
+    let selectedDays = 30;
+    let chartHistory = [];
+
+    function formatKzt(num) {
+      return (num || 0).toLocaleString('ru-RU') + ' ₸';
+    }
+
+    function showToast(msg, isSuccess = true) {
+      const toast = document.getElementById('toastMessage');
+      toast.innerText = msg;
+      toast.style.borderColor = isSuccess ? 'var(--accent-emerald)' : 'var(--accent-ruby)';
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    function setCategory(cat, btn) {
+      activeCategory = cat;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderTable();
+    }
+
+    async function loadPrices() {
+      try {
+        const res = await fetch('/api/prices');
+        allPrices = await res.json();
+        
+        const itemSelect = document.getElementById('itemSelect');
+        const modalSelect = document.getElementById('modalItemSelect');
+        itemSelect.innerHTML = '';
+        modalSelect.innerHTML = '';
+        
+        allPrices.forEach(item => {
+          const opt1 = document.createElement('option');
+          opt1.value = item.code;
+          opt1.text = `[${item.category}] ${item.name}`;
+          itemSelect.appendChild(opt1);
+
+          const opt2 = document.createElement('option');
+          opt2.value = item.code;
+          opt2.text = `${item.name} (${item.unit})`;
+          modalSelect.appendChild(opt2);
+        });
+
+        itemSelect.value = selectedCode;
+        renderKPIs();
+        renderTable();
+        loadHistory(selectedCode, selectedDays);
+      } catch (err) {
+        console.error('Failed to load prices', err);
+      }
+    }
+
+    function renderKPIs() {
+      document.getElementById('kpiTotalItems').innerText = allPrices.length;
+      const deltas = allPrices.map(p => p.delta_1d_pct || 0);
+      const avgDelta = (deltas.reduce((a, b) => a + b, 0) / (deltas.length || 1)).toFixed(2);
+      const kpiInflation = document.getElementById('kpiAvgInflation');
+      kpiInflation.innerText = (avgDelta > 0 ? '+' : '') + avgDelta + '%';
+      kpiInflation.style.color = avgDelta > 0.5 ? 'var(--accent-ruby)' : 'var(--accent-emerald)';
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('pricesTableBody');
+      const search = (document.getElementById('searchFilter').value || '').toLowerCase();
+      
+      const filtered = allPrices.filter(p => {
+        const matchCat = (activeCategory === 'ALL' || p.category === activeCategory);
+        const matchSearch = p.name.toLowerCase().includes(search) || p.code.toLowerCase().includes(search);
+        return matchCat && matchSearch;
+      });
+
+      tbody.innerHTML = '';
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding:30px; color:var(--text-muted);">Ничего не найдено</td></tr>';
+        return;
+      }
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        
+        let catBadge = 'badge-amber';
+        if (item.category === 'MILK') catBadge = 'badge-cyan';
+        else if (item.category === 'MEAT') catBadge = 'badge-ruby';
+        else if (item.category === 'FLOUR') catBadge = 'badge-gold';
+        else if (item.category === 'SPICE') catBadge = 'badge-emerald';
+
+        const d1 = item.delta_1d_pct || 0;
+        let d1Class = 'trend-stable';
+        let d1Sign = '';
+        if (d1 > 0) { d1Class = 'trend-up'; d1Sign = '▲ +'; }
+        else if (d1 < 0) { d1Class = 'trend-down'; d1Sign = '▼ '; }
+
+        const d7 = item.trend_pct || 0;
+        let d7Badge = '<span class="badge badge-cyan">─ СТАБИЛЬНО</span>';
+        if (item.trend === 'UP') d7Badge = `<span class="badge badge-ruby">▲ РОСТ ${d7}%</span>`;
+        if (item.trend === 'DOWN') d7Badge = `<span class="badge badge-emerald">▼ СПАД ${d7}%</span>`;
+
+        const srcUrl = item.source_url || '#';
+
+        tr.innerHTML = `
+          <td><span class="badge font-mono">${item.code}</span></td>
+          <td><span class="badge ${catBadge}">${item.category}</span></td>
+          <td><strong>${item.name}</strong></td>
+          <td class="font-mono text-muted">${item.unit}</td>
+          <td class="font-mono" style="text-align:right; color:var(--accent-emerald); font-weight:700;">${formatKzt(item.market_min_kzt)}</td>
+          <td class="font-mono" style="text-align:right; font-weight:600;">${formatKzt(item.market_avg_kzt)}</td>
+          <td class="font-mono" style="text-align:right; color:var(--accent-ruby);">${formatKzt(item.market_max_kzt)}</td>
+          <td class="font-mono ${d1Class}" style="text-align:center;">${d1Sign}${d1}%</td>
+          <td style="text-align:center;">${d7Badge}</td>
+          <td><span style="font-size:0.75rem; color:var(--accent-gold);">★ ${item.supplier}</span></td>
+          <td>
+            <a href="${srcUrl}" target="_blank" rel="noopener noreferrer" class="source-link" title="Открыть первоисточник котировки">
+              🔗 Открыть источник ↗
+            </a>
+          </td>
+          <td style="text-align:center; white-space:nowrap;">
+            <button class="btn btn-outline" style="padding:4px 8px; font-size:0.74rem;" onclick="viewItemChart('${item.code}')">📊</button>
+            <button class="btn btn-cyan" style="padding:4px 8px; font-size:0.74rem;" onclick="openItemLogs('${item.code}')" title="Посмотреть лог получения">📜 Лог</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function viewItemChart(code) {
+      selectedCode = code;
+      document.getElementById('itemSelect').value = code;
+      loadHistory(code, selectedDays);
+      window.scrollTo({ top: 320, behavior: 'smooth' });
+    }
+
+    function onSelectItemChange(val) {
+      selectedCode = val;
+      loadHistory(val, selectedDays);
+    }
+    function onDaysChange(val) {
+      selectedDays = parseInt(val, 10);
+      loadHistory(selectedCode, selectedDays);
+    }
+
+    async function loadHistory(code, days) {
+      try {
+        const res = await fetch(`/api/history?code=${code}&days=${days}`);
+        chartHistory = await res.json();
+        
+        const it = allPrices.find(p => p.code === code);
+        if (it) {
+          document.getElementById('chartItemTitle').innerText = `📈 ${it.name} (${it.unit}) — Динамика в Алматы`;
+          document.getElementById('chartItemSubtitle').innerText = `Текущий коридор: ${formatKzt(it.market_min_kzt)} ... ${formatKzt(it.market_max_kzt)} • Средняя: ${formatKzt(it.market_avg_kzt)}`;
+        }
+        drawChart();
+      } catch (err) {
+        console.error('Failed to load history', err);
+      }
+    }
+
+    function drawChart() {
+      const canvas = document.getElementById('priceCanvas');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      if (!chartHistory || chartHistory.length === 0) {
+        ctx.fillStyle = '#6e6760';
+        ctx.font = '14px Plus Jakarta Sans';
+        ctx.textAlign = 'center';
+        ctx.fillText('Нет данных для отображения графика', w / 2, h / 2);
+        return;
+      }
+
+      const paddingLeft = 65;
+      const paddingRight = 20;
+      const paddingTop = 25;
+      const paddingBottom = 40;
+      const plotW = w - paddingLeft - paddingRight;
+      const plotH = h - paddingTop - paddingBottom;
+
+      let minP = Infinity;
+      let maxP = -Infinity;
+      chartHistory.forEach(d => {
+        if (d.min_price < minP) minP = d.min_price;
+        if (d.max_price > maxP) maxP = d.max_price;
+      });
+
+      const range = (maxP - minP) || 1;
+      minP = Math.floor(minP - range * 0.08);
+      maxP = Math.ceil(maxP + range * 0.08);
+
+      ctx.strokeStyle = '#2b2723';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#6e6760';
+      ctx.font = '10px Fira Code';
+      ctx.textAlign = 'right';
+
+      const gridLines = 5;
+      for (let i = 0; i <= gridLines; i++) {
+        const yVal = minP + ((maxP - minP) * i) / gridLines;
+        const y = paddingTop + plotH - (i / gridLines) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(paddingLeft, y);
+        ctx.lineTo(w - paddingRight, y);
+        ctx.stroke();
+        ctx.fillText(Math.round(yVal) + ' ₸', paddingLeft - 8, y + 3);
+      }
+
+      ctx.textAlign = 'center';
+      const stepX = plotW / (chartHistory.length - 1 || 1);
+      const skipLabel = Math.ceil(chartHistory.length / 8);
+
+      chartHistory.forEach((d, idx) => {
+        const x = paddingLeft + idx * stepX;
+        if (idx % skipLabel === 0 || idx === chartHistory.length - 1) {
+          const parts = d.date.split('-');
+          ctx.fillText(`${parts[2]}.${parts[1]}`, x, h - 12);
+        }
+      });
+
+      // Corridor
+      ctx.beginPath();
+      chartHistory.forEach((d, idx) => {
+        const x = paddingLeft + idx * stepX;
+        const yMax = paddingTop + plotH - ((d.max_price - minP) / (maxP - minP)) * plotH;
+        if (idx === 0) ctx.moveTo(x, yMax);
+        else ctx.lineTo(x, yMax);
+      });
+      for (let idx = chartHistory.length - 1; idx >= 0; idx--) {
+        const d = chartHistory[idx];
+        const x = paddingLeft + idx * stepX;
+        const yMin = paddingTop + plotH - ((d.min_price - minP) / (maxP - minP)) * plotH;
+        ctx.lineTo(x, yMin);
+      }
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(0, 180, 216, 0.08)';
+      ctx.fill();
+
+      // Altyn Orda line
+      ctx.beginPath();
+      ctx.strokeStyle = '#27ae60';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      chartHistory.forEach((d, idx) => {
+        const p = d.sources?.altyn_orda || d.min_price;
+        const x = paddingLeft + idx * stepX;
+        const y = paddingTop + plotH - ((p - minP) / (maxP - minP)) * plotH;
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Avg Line
+      ctx.beginPath();
+      ctx.strokeStyle = '#e57c23';
+      ctx.lineWidth = 2.5;
+      chartHistory.forEach((d, idx) => {
+        const x = paddingLeft + idx * stepX;
+        const y = paddingTop + plotH - ((d.avg_price - minP) / (maxP - minP)) * plotH;
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Points
+      chartHistory.forEach((d, idx) => {
+        const x = paddingLeft + idx * stepX;
+        const y = paddingTop + plotH - ((d.avg_price - minP) / (maxP - minP)) * plotH;
+        ctx.beginPath();
+        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#e57c23';
+        ctx.fill();
+        ctx.strokeStyle = '#181614';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+    }
+
+    // Modal Fast Entry
+    function openFastEntryModal() {
+      document.getElementById('modalDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('fastEntryModal').style.display = 'flex';
+    }
+    function closeFastEntryModal() {
+      document.getElementById('fastEntryModal').style.display = 'none';
+    }
+
+    async function submitFastEntry(e) {
+      e.preventDefault();
+      const code = document.getElementById('modalItemSelect').value;
+      const source_id = document.getElementById('modalSourceSelect').value;
+      const price_kzt = document.getElementById('modalPriceInput').value;
+      const source_url = document.getElementById('modalUrlInput').value;
+      const date = document.getElementById('modalDateInput').value;
+      const notes = document.getElementById('modalNotesInput').value;
+
+      try {
+        const res = await fetch('/api/entry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, source_id, price_kzt, source_url, date, notes })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Котировка для ${code} зафиксирована с ссылкой и внесена в аудит-лог!`);
+          closeFastEntryModal();
+          loadPrices();
+        } else {
+          showToast('Ошибка сохранения: ' + (data.error || 'неизвестно'), false);
+        }
+      } catch (err) {
+        showToast('Сетевая ошибка', false);
+      }
+    }
+
+    // Acquisition Audit Logs Modal
+    async function openItemLogs(code) {
+      try {
+        const res = await fetch(`/api/logs?code=${code}&limit=50`);
+        const logs = await res.json();
+        const it = allPrices.find(p => p.code === code);
+        document.getElementById('logsModalTitle').innerText = `📜 Журнал аудита: ${it ? it.name : code}`;
+        document.getElementById('logsModalSubtitle').innerText = `История котировок, первоисточников и результатов парсинга для ${code}`;
+        renderLogsTable(logs);
+        document.getElementById('logsModal').style.display = 'flex';
+      } catch (e) {
+        showToast('Ошибка загрузки журнала логов', false);
+      }
+    }
+
+    async function openSystemLogsModal() {
+      try {
+        const res = await fetch('/api/logs?limit=80');
+        const logs = await res.json();
+        document.getElementById('logsModalTitle').innerText = `📜 Общий журнал сбора цен (г. Алматы)`;
+        document.getElementById('logsModalSubtitle').innerText = `Хронологический лог запросов по всем каналам и сырьевым позициям`;
+        renderLogsTable(logs);
+        document.getElementById('logsModal').style.display = 'flex';
+      } catch (e) {
+        showToast('Ошибка загрузки общего журнала', false);
+      }
+    }
+
+    function closeLogsModal() {
+      document.getElementById('logsModal').style.display = 'none';
+    }
+
+    function renderLogsTable(logs) {
+      const tbody = document.getElementById('logsTableBody');
+      tbody.innerHTML = '';
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted);">Логи отсутствуют</td></tr>';
+        return;
+      }
+      logs.forEach(l => {
+        const tr = document.createElement('tr');
+        const isCrawl = l.method === 'AUTO_CRAWL';
+        const methodBadge = isCrawl 
+          ? '<span class="badge badge-cyan">🤖 AUTO CRAWL</span>' 
+          : '<span class="badge badge-amber">✍️ MANUAL ENTRY</span>';
+        
+        const statusBadge = l.status === 'VERIFIED'
+          ? '<span class="badge badge-emerald">✔ 200 OK</span>'
+          : '<span class="badge badge-ruby">WARN</span>';
+
+        tr.innerHTML = `
+          <td class="font-mono text-muted" style="font-size:0.75rem;">${l.timestamp.replace('T', ' ').substring(0, 19)}</td>
+          <td><strong>${l.item_name || l.code}</strong></td>
+          <td><span style="color:var(--accent-gold); font-size:0.78rem;">${l.source_name || l.source_id}</span></td>
+          <td class="font-mono" style="text-align:right; font-weight:700; color:var(--accent-emerald);">${formatKzt(l.price_kzt)}</td>
+          <td style="text-align:center;">${methodBadge}</td>
+          <td style="text-align:center;">${statusBadge}</td>
+          <td>
+            <a href="${l.url || '#'}" target="_blank" rel="noopener noreferrer" class="source-link">
+              🔗 ${l.url ? l.url.substring(0, 42) + '...' : 'нет URL'} ↗
+            </a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Trigger Crawl
+    async function triggerCrawl() {
+      showToast('Запуск автопарсинга цен по г. Алматы...');
+      try {
+        const res = await fetch('/api/crawl', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Автопарсинг завершен! Обновлено: ${data.updatedCount} позиций, логи сохранены.`);
+          loadPrices();
+        }
+      } catch (err) {
+        showToast('Ошибка выполнения парсинга', false);
+      }
+    }
+
+    // Synchronize to Master ERP
+    async function syncWithMasterErp() {
+      const erpUrl = document.getElementById('erpApiUrl').value;
+      showToast('Отправка котировок с ссылками в Master ERP...');
+      try {
+        const res = await fetch('/api/sync-to-erp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ erp_api_url: erpUrl })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const count = data.synced_items_count || 43;
+          showToast(`Успешно передано в Master ERP: ${count} позиций сырья с первоисточниками!`);
+          document.getElementById('kpiErpStatus').innerText = 'Синхронизировано (' + count + ')';
+        } else {
+          showToast('Ошибка синхронизации: ' + data.notice, false);
+        }
+      } catch (err) {
+        showToast('Ошибка связи с сервером ERP', false);
+      }
+    }
+
+    window.addEventListener('resize', drawChart);
+    window.onload = () => { loadPrices(); };
+  </script>
+</body>
+</html>
