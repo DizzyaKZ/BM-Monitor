@@ -7,8 +7,8 @@
 // Параметры базы данных на сервере PS.kz (cPanel MySQL)
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
 define('DB_NAME', getenv('DB_NAME') ?: 'beermood_monitor');
-define('DB_USER', getenv('DB_USER') ?: 'beermood_monuser');
-define('DB_PASS', getenv('DB_PASS') ?: 'AKc3LrWDrX6yt4E');
+define('DB_USER', getenv('DB_USER') ?: 'beermood_user');
+define('DB_PASS', getenv('DB_PASS') ?: 'MoodGroup2026!');
 define('DB_CHARSET', 'utf8mb4');
 
 // Целевой адрес Master ERP для синхронизации котировок

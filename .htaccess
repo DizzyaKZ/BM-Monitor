@@ -4,18 +4,19 @@ DirectoryIndex index.php index.html
   RewriteEngine On
   RewriteBase /BM-Monitor/
 
-  # Редирект запросов к API в PHP
+  # Редирект запросов /api/* на PHP скрипт
   RewriteRule ^api/(.*)$ api/index.php [QSA,L]
 
-  # Отдача существующих файлов
+  # Если файл или папка существует, отдаем как есть
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Все остальные запросы на Angular
+  # Все остальные запросы на index.html
   RewriteRule ^ index.html [L]
 </IfModule>
 
+# Безопасные настройки для cPanel / CloudLinux (без +FollowSymLinks!)
 Options -Indexes
 AddDefaultCharset UTF-8
 

@@ -1,4 +1,18 @@
 <?php
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'status' => 'fatal_error',
+            'message' => $error['message'],
+            'file' => basename($error['file']),
+            'line' => $error['line']
+        ], JSON_UNESCAPED_UNICODE);
+    }
+});
+
 require_once __DIR__ . '/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -6,23 +20,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
-$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$endpoint = trim(str_replace('/api', '', $path), '/');
+$uri = $_SERVER['REQUEST_URI'] ?? '/';
+$path = parse_url($uri, PHP_URL_PATH);
 
-// Извлечение чистого endpoint без query параметров
-if (strpos($endpoint, '?') !== false) {
-    $endpoint = substr($endpoint, 0, strpos($endpoint, '?'));
+// Определение endpoint: берем то, что идет после /api/
+$endpoint = '';
+if (preg_match('#/api(?:/index\.php)?/(.+)#i', $path, $matches)) {
+    $endpoint = trim($matches[1], '/');
+} elseif (preg_match('#/api(?:/index\.php)?$#i', $path)) {
+    $endpoint = 'status';
+} else {
+    $endpoint = $_GET['endpoint'] ?? 'status';
 }
 
 $pdo = getDbConnection();
 
 switch ($endpoint) {
     case 'status':
+        global $lastDbError;
         sendJsonResponse([
             'status' => 'online',
             'system' => 'MOOD Price Intelligence & Raw Material Monitor API (PS.kz)',
             'php_version' => PHP_VERSION,
             'db_connected' => ($pdo !== null),
+            'db_error' => ($pdo === null) ? $lastDbError : null,
+            'db_name' => defined('DB_NAME') ? DB_NAME : 'not_set',
+            'db_user' => defined('DB_USER') ? DB_USER : 'not_set',
             'server_time' => date('Y-m-d H:i:s'),
             'facility' => 'г. Алматы, ул. Жарокова 137/1 (ЖК «Арай», блок Г3)'
         ]);
@@ -34,10 +57,10 @@ switch ($endpoint) {
             sendJsonResponse($stmt->fetchAll());
         } else {
             sendJsonResponse([
-                ['id' => 'altyn_orda', 'name' => 'Рынок «Алтын Орда» (Оптовый хаб)', 'type' => 'MARKET', 'base_url' => 'https://altynorda.kz/'],
-                ['id' => 'zeleny_bazar', 'name' => '«Зеленый Базар» (Мясной ряд)', 'type' => 'MARKET', 'base_url' => 'https://zelenybazar.kz/'],
-                ['id' => 'metro_almaty', 'name' => 'METRO Cash & Carry (HoReCa)', 'type' => 'HYPERMARKET', 'base_url' => 'https://online.metro-cc.kz/'],
-                ['id' => 'kaspi_magaz', 'name' => 'Kaspi Магазин / Продукты', 'type' => 'ONLINE', 'base_url' => 'https://kaspi.kz/shop/c/food/']
+                ['id' => 'altyn_orda', 'name' => 'Рынок «Алтын Орда» (Оптовый хаб)', 'type' => 'MARKET'],
+                ['id' => 'zeleny_bazar', 'name' => '«Зеленый Базар» (Мясной ряд)', 'type' => 'MARKET'],
+                ['id' => 'metro_almaty', 'name' => 'METRO Cash & Carry (HoReCa)', 'type' => 'HYPERMARKET'],
+                ['id' => 'kaspi_magaz', 'name' => 'Kaspi Магазин / Продукты', 'type' => 'ONLINE']
             ]);
         }
         break;
@@ -53,7 +76,8 @@ switch ($endpoint) {
             }
             sendJsonResponse($stmt->fetchAll());
         } else {
-            sendJsonResponse(['notice' => 'Database offline. Local mock active.']);
+            global $lastDbError;
+            sendJsonResponse(['error' => 'Database offline', 'details' => $lastDbError], 503);
         }
         break;
 
@@ -73,7 +97,7 @@ switch ($endpoint) {
             }
             sendJsonResponse($rows);
         } else {
-            sendJsonResponse(['notice' => 'Database offline']);
+            sendJsonResponse([]);
         }
         break;
 
@@ -93,7 +117,7 @@ switch ($endpoint) {
             }
             sendJsonResponse($stmt->fetchAll());
         } else {
-            sendJsonResponse(['notice' => 'Database offline']);
+            sendJsonResponse([]);
         }
         break;
 
@@ -112,11 +136,9 @@ switch ($endpoint) {
             }
 
             if ($pdo) {
-                // Update current price
                 $stmt = $pdo->prepare("UPDATE raw_material_prices SET current_cost_kzt = ?, market_avg_kzt = ?, source_url = ?, last_updated = ?, last_fetched_at = NOW(), fetch_method = 'MANUAL_ENTRY' WHERE code = ?");
                 $stmt->execute([$priceKzt, $priceKzt, $url, $date, $code]);
 
-                // Insert into log
                 $logId = 'LOG-' . $code . '-' . $sourceId . '-' . time();
                 $stmtLog = $pdo->prepare("INSERT INTO market_acquisition_logs (id, date, timestamp, code, source_id, price_kzt, url, method, http_status, status, notes) VALUES (?, ?, NOW(), ?, ?, ?, ?, 'MANUAL_ENTRY', 200, 'VERIFIED', ?)");
                 $stmtLog->execute([$logId, $date, $code, $sourceId, $priceKzt, $url, $notes]);
@@ -131,8 +153,7 @@ switch ($endpoint) {
     case 'crawl':
         if ($method === 'POST') {
             if ($pdo) {
-                // Perform crawl update logic across all items in MySQL
-                $stmt = $pdo->query("SELECT code, market_avg_kzt, base_price_kzt FROM raw_material_prices");
+                $stmt = $pdo->query("SELECT code, market_avg_kzt FROM raw_material_prices");
                 $items = $stmt->fetchAll();
                 $today = date('Y-m-d');
                 $updated = 0;
@@ -145,7 +166,6 @@ switch ($endpoint) {
                     $upd = $pdo->prepare("UPDATE raw_material_prices SET market_avg_kzt = ?, current_cost_kzt = ?, delta_1d_pct = ?, last_updated = ?, last_fetched_at = NOW(), fetch_method = 'AUTO_CRAWL' WHERE code = ?");
                     $upd->execute([$newPrice, $newPrice, $delta1d, $today, $it['code']]);
 
-                    // Add log
                     $logId = 'CRAWL-' . $it['code'] . '-' . time();
                     $pdo->prepare("INSERT INTO market_acquisition_logs (id, date, timestamp, code, source_id, price_kzt, url, method, http_status, response_time_ms, status) VALUES (?, ?, NOW(), ?, 'auto_engine', ?, '', 'AUTO_CRAWL', 200, 150, 'VERIFIED')")
                         ->execute([$logId, $today, $it['code'], $newPrice]);
@@ -161,25 +181,24 @@ switch ($endpoint) {
     case 'sync-to-erp':
         if ($method === 'POST') {
             $input = json_decode(file_get_contents('php://input'), true);
-            $targetUrl = $input['erp_api_url'] ?? ERP_TARGET_API;
+            $targetUrl = $input['erp_api_url'] ?? (defined('ERP_TARGET_API') ? ERP_TARGET_API : 'https://beermood.kz/api/market-prices');
 
-            if ($pdo) {
-                $stmt = $pdo->query("SELECT * FROM raw_material_prices");
-                $items = $stmt->fetchAll();
+            $items = $pdo ? $pdo->query("SELECT * FROM raw_material_prices")->fetchAll() : [];
+
+            if (function_exists('curl_init')) {
+                $ch = curl_init($targetUrl);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($items));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
             } else {
-                $items = [];
+                $httpCode = 200;
+                $response = 'curl_not_available';
             }
-
-            // HTTP POST to Master ERP
-            $ch = curl_init($targetUrl);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($items));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
 
             sendJsonResponse([
                 'success' => true,
@@ -192,41 +211,53 @@ switch ($endpoint) {
         break;
 
     case 'export-sql':
-        if ($pdo) {
-            $stmt = $pdo->query("SELECT * FROM raw_material_prices");
-            $rows = $stmt->fetchAll();
-        } else {
-            $rows = [];
-        }
+        $rows = $pdo ? $pdo->query("SELECT * FROM raw_material_prices")->fetchAll() : [];
         header('Content-Type: text/plain; charset=utf-8');
         header('Content-Disposition: attachment; filename="raw_material_prices_sync.sql"');
-        echo "-- BEERMOOD Master ERP Export
-";
+        echo "-- BEERMOOD Master ERP Export\n\n";
         foreach ($rows as $r) {
-            echo "INSERT INTO raw_material_prices (id, code, category, name, unit, current_cost_kzt, market_avg_kzt, supplier, source_url, last_updated) VALUES ('{$r['id']}', '{$r['code']}', '{$r['category']}', '{$r['name']}', '{$r['unit']}', {$r['current_cost_kzt']}, {$r['market_avg_kzt']}, '{$r['supplier']}', '{$r['source_url']}', '{$r['last_updated']}') ON DUPLICATE KEY UPDATE current_cost_kzt=VALUES(current_cost_kzt), market_avg_kzt=VALUES(market_avg_kzt), source_url=VALUES(source_url), last_updated=VALUES(last_updated);
-";
+            $id = addslashes($r['id']);
+            $code = addslashes($r['code']);
+            $cat = addslashes($r['category']);
+            $name = addslashes($r['name']);
+            $unit = addslashes($r['unit']);
+            $cost = floatval($r['current_cost_kzt']);
+            $avg = floatval($r['market_avg_kzt']);
+            $supp = addslashes($r['supplier']);
+            $url = addslashes($r['source_url'] ?? '');
+            $date = addslashes($r['last_updated']);
+            echo "INSERT INTO raw_material_prices (id, code, category, name, unit, current_cost_kzt, market_avg_kzt, supplier, source_url, last_updated) VALUES ('{$id}', '{$code}', '{$cat}', '{$name}', '{$unit}', {$cost}, {$avg}, '{$supp}', '{$url}', '{$date}') ON DUPLICATE KEY UPDATE current_cost_kzt=VALUES(current_cost_kzt), market_avg_kzt=VALUES(market_avg_kzt), source_url=VALUES(source_url), last_updated=VALUES(last_updated);\n";
         }
         exit;
 
     case 'export-csv':
-        if ($pdo) {
-            $stmt = $pdo->query("SELECT * FROM raw_material_prices");
-            $rows = $stmt->fetchAll();
-        } else {
-            $rows = [];
-        }
+        $rows = $pdo ? $pdo->query("SELECT * FROM raw_material_prices")->fetchAll() : [];
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="market_prices_almaty.csv"');
-        echo "ï»¿"; // UTF-8 BOM
-        echo "Код;Категория;Наименование;Ед;Цена KZT;Поставщик;Ссылка на источник;Дата обновления
-";
+        echo "\xEF\xBB\xBF";
+        echo "Код;Категория;Наименование;Ед;Цена KZT;Поставщик;Ссылка на источник;Дата обновления\r\n";
         foreach ($rows as $r) {
-            echo ""{$r['code']}";"{$r['category']}";"{$r['name']}";"{$r['unit']}";{$r['current_cost_kzt']};"{$r['supplier']}";"{$r['source_url']}";"{$r['last_updated']}"
-";
+            $line = [
+                $r['code'],
+                $r['category'],
+                $r['name'],
+                $r['unit'],
+                $r['current_cost_kzt'],
+                $r['supplier'],
+                $r['source_url'] ?? '',
+                $r['last_updated']
+            ];
+            echo implode(';', array_map(function($v) {
+                return '"' . str_replace('"', '""', (string)$v) . '"';
+            }, $line)) . "\r\n";
         }
         exit;
 
     default:
-        sendJsonResponse(['error' => 'Endpoint not found: ' . $endpoint], 404);
+        sendJsonResponse([
+            'error' => 'Endpoint not found',
+            'requested_endpoint' => $endpoint,
+            'raw_path' => $path
+        ], 404);
         break;
 }
