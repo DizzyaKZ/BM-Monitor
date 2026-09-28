@@ -15,25 +15,20 @@ register_shutdown_function(function() {
 
 require_once __DIR__ . '/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    sendJsonResponse(['status' => 'ok']);
-}
-
-$isCli = (php_sapi_name() === 'cli');
+$isCli = (php_sapi_name() === 'cli' || empty($_SERVER['REQUEST_METHOD']));
 
 if ($isCli) {
     // Поддержка запуска из Plesk / cPanel Cron через PHP CLI: php index.php crawl
     $endpoint = $argv[1] ?? 'crawl';
     $method = 'POST';
 } else {
-    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    if ($method === 'OPTIONS') {
         sendJsonResponse(['status' => 'ok']);
     }
-    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     $uri = $_SERVER['REQUEST_URI'] ?? '/';
     $path = parse_url($uri, PHP_URL_PATH);
 
-    // Определение endpoint: берем то, что идет после /api/
     $endpoint = '';
     if (preg_match('#/api(?:/index\.php)?/(.+)#i', $path, $matches)) {
         $endpoint = trim($matches[1], '/');
@@ -46,8 +41,13 @@ if ($isCli) {
 
 $pdo = getDbConnection();
 
+// Автомиграция колонок и исправление доменов
 if ($pdo) {
     try {
+        $cols = $pdo->query("SHOW COLUMNS FROM raw_material_prices LIKE 'best_source'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->query("ALTER TABLE raw_material_prices ADD COLUMN `best_source` VARCHAR(50) NOT NULL DEFAULT 'altyn_orda' AFTER `supplier`");
+        }
         $pdo->query("UPDATE raw_material_prices SET source_url = 'https://www.metro-kz.com/assortment' WHERE source_url LIKE '%metro-cc.kz%'");
         $pdo->query("UPDATE market_sources SET base_url = 'https://www.metro-kz.com/' WHERE id = 'metro_almaty'");
     } catch (Throwable $e) {}
@@ -278,7 +278,7 @@ switch ($endpoint) {
         // Поддержка GET и POST для вызова через cron (curl, wget, Plesk URL fetch, браузер)
         if ($pdo) {
             try {
-                $stmt = $pdo->query("SELECT code, market_avg_kzt, best_source FROM raw_material_prices");
+                $stmt = $pdo->query("SELECT * FROM raw_material_prices");
                 $items = $stmt->fetchAll();
                 $today = date('Y-m-d');
                 $updated = 0;
