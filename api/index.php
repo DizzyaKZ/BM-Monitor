@@ -74,7 +74,17 @@ switch ($endpoint) {
             } else {
                 $stmt = $pdo->query("SELECT * FROM raw_material_prices ORDER BY category ASC, code ASC");
             }
-            sendJsonResponse($stmt->fetchAll());
+            $rows = $stmt->fetchAll();
+            foreach ($rows as &$r) {
+                $r['current_cost_kzt'] = (float)$r['current_cost_kzt'];
+                $r['market_avg_kzt'] = (float)$r['market_avg_kzt'];
+                $r['market_min_kzt'] = (float)$r['market_min_kzt'];
+                $r['market_max_kzt'] = (float)$r['market_max_kzt'];
+                $r['trend_pct'] = (float)$r['trend_pct'];
+                $r['delta_1d_pct'] = isset($r['delta_1d_pct']) ? (float)$r['delta_1d_pct'] : 0.0;
+                $r['delta_30d_pct'] = isset($r['delta_30d_pct']) ? (float)$r['delta_30d_pct'] : 0.0;
+            }
+            sendJsonResponse($rows);
         } else {
             global $lastDbError;
             sendJsonResponse(['error' => 'Database offline', 'details' => $lastDbError], 503);
