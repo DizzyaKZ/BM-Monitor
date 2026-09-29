@@ -540,11 +540,9 @@ switch ($endpoint) {
                 ];
 
                 foreach ($items as $it) {
-                    $variance = ((rand(0, 1000) / 1000.0) - 0.49) * 0.02;
-                    $oldPrice = (float)$it['competitor_price_kzt'];
-                    $newPrice = round($oldPrice * (1 + $variance));
-                    $delta1d = round($variance * 100, 1);
-                    $respMs = rand(100, 240);
+                    $newPrice = (float)$it['competitor_price_kzt'];
+                    $delta1d = 0.0;
+                    $respMs = 90 + ($updated % 4) * 20;
 
                     $upd->execute([$newPrice, $delta1d, $today, $nowTs, $it['code']]);
 
@@ -592,10 +590,10 @@ switch ($endpoint) {
         if ($pdo) {
             try {
                 ensureLogsTable($pdo);
-                $items = $pdo->query("SELECT * FROM finished_product_prices WHERE fetch_method = 'AUTO_CRAWL'")->fetchAll();
+                $items = $pdo->query("SELECT * FROM finished_product_prices ORDER BY brand, category, name")->fetchAll();
                 if (empty($items)) {
                     seedCleanFinishedProducts($pdo, $CLEAN_FINISHED_PRODUCTS);
-                    $items = $pdo->query("SELECT * FROM finished_product_prices WHERE fetch_method = 'AUTO_CRAWL'")->fetchAll();
+                    $items = $pdo->query("SELECT * FROM finished_product_prices ORDER BY brand, category, name")->fetchAll();
                 }
 
                 $today = date('Y-m-d');
@@ -619,11 +617,9 @@ switch ($endpoint) {
                 ");
 
                 foreach ($items as $it) {
-                    $variance = ((rand(0, 1000) / 1000.0) - 0.49) * 0.02;
-                    $oldPrice = (float)$it['competitor_price_kzt'];
-                    $newPrice = round($oldPrice * (1 + $variance));
-                    $delta1d = round($variance * 100, 1);
-                    $respMs = rand(100, 240);
+                    $newPrice = (float)$it['competitor_price_kzt'];
+                    $delta1d = 0.0;
+                    $respMs = 90 + ($updated % 4) * 20;
 
                     $upd->execute([$newPrice, $delta1d, $today, $nowTs, $it['code']]);
 
@@ -1027,10 +1023,9 @@ switch ($endpoint) {
                 ");
 
                 foreach ($items as $it) {
-                    $variance = ((rand(0, 1000) / 1000.0) - 0.49) * 0.024;
-                    $newPrice = round($it['market_avg_kzt'] * (1 + $variance), 2);
-                    $delta1d = round($variance * 100, 2);
-                    $respMs = rand(110, 290);
+                    $newPrice = (float)$it["current_cost_kzt"];
+                    $delta1d = 0.00;
+                    $respMs = 95 + ($updated % 5) * 20;
 
                     $upd->execute([$newPrice, $newPrice, $delta1d, $today, $nowTs, $it['code']]);
 

@@ -156,7 +156,7 @@ export interface FinishedProductItem {
   source_url: string;
   last_updated: string;
   last_fetched_at?: string;
-  fetch_method?: string;
+  fetch_method?: FetchMethod;
   status: 'VERIFIED' | 'UPDATED' | 'ATTENTION';
   beer_style?: string; // Стиль пива: IPA, APA, Stout, Pilsner, Helles, Blanche, Sour, Cider
   [key: string]: any;
