@@ -218,6 +218,12 @@ import { FinishedProductBrand, ChannelType, FinishedProductItem } from '../model
               <td class="cell-actions text-center">
                 <button 
                   class="btn-edit-icon" 
+                  (click)="svc.openLogsModal(item.code)"
+                  title="Посмотреть лог аудита получения цены">
+                  📜
+                </button>
+                <button 
+                  class="btn-edit-icon" 
                   (click)="svc.openFinishedEntryModal(item)"
                   title="Быстро обновить цену или ссылку на меню">
                   ✏️

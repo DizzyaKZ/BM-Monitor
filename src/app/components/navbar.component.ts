@@ -41,6 +41,9 @@ import { MarketMonitorService } from '../services/market-monitor.service';
         <div class="header-actions">
           <!-- FINISHED PRODUCTS ACTIONS -->
           <ng-container *ngIf="svc.activeMode() === 'FINISHED_PRODUCTS'">
+            <button class="btn btn-outline" (click)="svc.openLogsModal()" title="Открыть журнал аудита и историю фиксации цен">
+              📜 Журнал аудита
+            </button>
             <button class="btn btn-primary" (click)="svc.openFinishedEntryModal()">
               ➕ Добавить в меню
             </button>
