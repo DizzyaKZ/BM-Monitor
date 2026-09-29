@@ -131,8 +131,8 @@ import { RawMaterialItem } from '../models/market-monitor.model';
                 <span style="font-size:0.75rem; color:var(--accent-gold);">★ {{ item.supplier }}</span>
               </td>
               <td>
-                <a [href]="item.source_url" target="_blank" rel="noopener noreferrer" class="source-link" title="Открыть первоисточник котировки">
-                  🔗 Открыть источник ↗
+                <a [href]="item.source_url" target="_blank" rel="noopener noreferrer" class="source-link" [title]="'Открыть точный источник: ' + item.source_url">
+                  🔗 {{ getSourceLabel(item) }} ↗
                 </a>
               </td>
               <td style="text-align:center; white-space:nowrap;">
@@ -358,6 +358,19 @@ import { RawMaterialItem } from '../models/market-monitor.model';
 export class PricesTableComponent {
   svc = inject(MarketMonitorService);
   erpTargetUrl = 'http://localhost:4200/api/market-prices';
+
+  getSourceLabel(item: any): string {
+    const url = item?.source_url || '';
+    if (url.includes('satu.kz')) return 'Satu.kz B2B';
+    if (url.includes('metro-kz.com')) return 'METRO B2B';
+    if (url.includes('bifi.kz')) return 'Bifi.kz Sacco';
+    if (url.includes('arbuz.kz')) return 'Arbuz.kz';
+    if (url.includes('magnum.kz')) return 'Magnum';
+    if (url.includes('kaspi.kz')) return 'Kaspi';
+    if (item?.best_source_name) return String(item.best_source_name).split('(')[0].trim();
+    if (item?.supplier) return String(item.supplier).split('(')[0].trim();
+    return 'Конечный источник';
+  }
 
   getCategoryBadge(cat: string) {
     if (cat === 'MILK') return 'badge-cyan';

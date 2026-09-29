@@ -97,7 +97,7 @@ import { MarketSource, CompetitorVenue, ChannelType } from '../models/market-mon
             </div>
 
             <div class="form-group">
-              <label>Ссылка на первоисточник (Сайт, Меню, 2GIS, Каталог):</label>
+              <label>Ссылка на первоисточник (Сайт, Меню, Untappd, Каталог):</label>
               <input type="url" [(ngModel)]="newUrl" placeholder="https://..." class="form-input" />
             </div>
 
@@ -164,7 +164,7 @@ import { MarketSource, CompetitorVenue, ChannelType } from '../models/market-mon
                 <tr>
                   <th>Поставщик / Хаб</th>
                   <th>Тип источника</th>
-                  <th>Ссылка на каталог / 2GIS</th>
+                  <th>Ссылка на каталог / Меню</th>
                   <th>Специализация поставок сырья</th>
                 </tr>
               </thead>
@@ -422,8 +422,8 @@ export class SourcesModalComponent {
         name: this.newName.trim(),
         channel_type: this.newChannelType,
         address: this.newAddress.trim() || 'Алматы',
-        menu_url: this.newUrl.trim() || 'https://2gis.kz/almaty',
-        platform: '2GIS / Меню',
+        menu_url: this.newUrl.trim() || 'https://wolt.com/ru/kaz/almaty',
+        platform: 'Wolt / Меню / Untappd',
         notes: this.newNotes.trim() || 'Новый источник цен'
       });
       this.activeTab = 'VENUES';
@@ -431,7 +431,7 @@ export class SourcesModalComponent {
       await this.svc.addSource({
         name: this.newName.trim(),
         type: this.newSourceType,
-        base_url: this.newUrl.trim() || 'https://2gis.kz/almaty',
+        base_url: this.newUrl.trim() || 'https://wolt.com/ru/kaz/almaty',
         description: this.newNotes.trim() || 'Оптовый источник сырья'
       });
       this.activeTab = 'RAW_SOURCES';

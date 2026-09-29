@@ -67,7 +67,7 @@ import { MarketMonitorService } from '../services/market-monitor.service';
               <input 
                 type="text" 
                 [(ngModel)]="formData.source_name" 
-                placeholder="Wolt Меню / 2GIS / Сайт"
+                placeholder="Wolt Меню / Untappd / Сайт"
                 class="form-control" />
             </div>
           </div>
@@ -77,7 +77,7 @@ import { MarketMonitorService } from '../services/market-monitor.service';
             <input 
               type="url" 
               [(ngModel)]="formData.source_url" 
-              placeholder="https://2gis.kz/almaty/... или https://wolt.com/..."
+              placeholder="https://wolt.com/... или https://untappd.com/... или https://satu.kz/..."
               class="form-control" />
           </div>
 
