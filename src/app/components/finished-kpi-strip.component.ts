@@ -17,7 +17,7 @@ import { MarketMonitorService } from '../services/market-monitor.service';
           {{ kpi().total }} <span class="kpi-unit">позиций</span>
         </div>
         <div class="kpi-subtext">
-          Охвачено <strong>{{ kpi().venuesCount }}</strong> заведений (Harat's, Dublin, Galmart, Hophead, Сырный Сомелье и др.)
+          🤖 <strong>{{ kpi().autoCount }}</strong> онлайн-меню • 📝 <strong>{{ kpi().manualCount }}</strong> оффлайн (исключены из авто-динамики)
         </div>
       </div>
 
@@ -43,7 +43,7 @@ import { MarketMonitorService } from '../services/market-monitor.service';
           +{{ kpi().avgPriceAdvantagePct }}<span class="kpi-unit">%</span>
         </div>
         <div class="kpi-subtext">
-          Разница между ценой BeerMood и средней ценой аналогов в меню баров и супермаркетов
+          Разница между ценой BeerMood и средней ценой аналогов в заведениях Алматы
         </div>
       </div>
 
@@ -131,6 +131,7 @@ import { MarketMonitorService } from '../services/market-monitor.service';
       color: var(--text-secondary);
       line-height: 1.4;
     }
+    .kpi-subtext strong { color: #fff; }
     .text-emerald { color: #2ecc71 !important; }
     .text-gold { color: #f1c40f !important; }
     .text-amber { color: #e67e22 !important; }

@@ -85,3 +85,58 @@ select:focus, input:focus { border-color: var(--accent-amber); }
 .badge-cyan { background: var(--accent-cyan-soft); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); }
 .badge-ruby { background: var(--accent-ruby-soft); color: var(--accent-ruby); border: 1px solid var(--accent-ruby); }
 .badge-gold { background: rgba(243, 156, 18, 0.16); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+
+
+/* ============================================================== */
+/* MANUAL ENTRY (РУЧНОЙ ВВОД / ОФФЛАЙН-РЫНКИ И ТОЧКИ)             */
+/* ============================================================== */
+.row-manual {
+  background: rgba(255, 255, 255, 0.012) !important;
+  opacity: 0.65;
+  filter: grayscale(0.65);
+  transition: opacity 0.2s, filter 0.2s;
+}
+.row-manual:hover {
+  opacity: 0.95;
+  filter: grayscale(0.1);
+}
+.row-manual td {
+  color: #94a3b8 !important;
+}
+.row-manual strong {
+  color: #cbd5e1 !important;
+}
+.row-manual code {
+  color: #94a3b8 !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+.row-manual .current-price,
+.row-manual .target-price,
+.row-manual .cogs-price {
+  color: #94a3b8 !important;
+}
+.badge-method-auto {
+  background: rgba(39, 174, 96, 0.15) !important;
+  color: #2ecc71 !important;
+  border: 1px solid rgba(39, 174, 96, 0.3) !important;
+  font-size: 0.64rem !important;
+  font-weight: 700 !important;
+  padding: 1px 6px !important;
+  border-radius: 3px !important;
+  display: inline-block;
+}
+.badge-method-manual {
+  background: rgba(148, 163, 184, 0.12) !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  font-size: 0.64rem !important;
+  font-weight: 700 !important;
+  padding: 1px 6px !important;
+  border-radius: 3px !important;
+  display: inline-block;
+}
+.manual-dash {
+  color: #64748b !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+}

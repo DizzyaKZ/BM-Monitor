@@ -23,13 +23,37 @@ import { FinishedProductBrand, ChannelType, FinishedProductItem } from '../model
             </button>
           </div>
 
+          <!-- Method Filter Tabs -->
+          <div class="method-pills">
+            <button 
+              class="pill-btn" 
+              [class.active]="svc.finishedMethodFilter() === 'ALL'" 
+              (click)="svc.finishedMethodFilter.set('ALL')">
+              Все ({{ svc.finishedProducts().length }})
+            </button>
+            <button 
+              class="pill-btn pill-auto" 
+              [class.active]="svc.finishedMethodFilter() === 'AUTO_CRAWL'" 
+              (click)="svc.finishedMethodFilter.set('AUTO_CRAWL')"
+              title="Позиции с автоматическим сбором цен из онлайн-меню (Wolt, Galmart, Colibri, Prime Meat)">
+              🤖 Авто-меню ({{ getAutoCount() }})
+            </button>
+            <button 
+              class="pill-btn pill-manual" 
+              [class.active]="svc.finishedMethodFilter() === 'MANUAL_ENTRY'" 
+              (click)="svc.finishedMethodFilter.set('MANUAL_ENTRY')"
+              title="Позиции с ручной фиксацией (оффлайн-бары, доски с кранами, лавки) — исключены из динамики">
+              📝 Ручной ввод ({{ getManualCount() }})
+            </button>
+          </div>
+
           <!-- Channel Filter -->
           <div class="channel-select-wrap">
             <select 
               [ngModel]="svc.selectedChannel()"
               (ngModelChange)="svc.setSelectedChannel($event)"
               class="channel-select">
-              <option value="ALL">Все каналы сбыта (Бары, Лавки, Ритейл)</option>
+              <option value="ALL">Все каналы (Бары, Лавки, Ритейл)</option>
               <option value="BAR_PUB">🍺 Бары, пабы и рестораны</option>
               <option value="CRAFT_SHOP">🏪 Крафтовые боттлшопы и лавки</option>
               <option value="RETAIL_SUPERMARKET">🛒 Премиум-ритейл (Galmart, Colibri, ВкусВилл)</option>
@@ -93,16 +117,22 @@ import { FinishedProductBrand, ChannelType, FinishedProductItem } from '../model
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of svc.filteredFinishedProducts()" class="table-row">
+            <tr *ngFor="let item of svc.filteredFinishedProducts()" class="table-row" [class.row-manual]="item.fetch_method === 'MANUAL_ENTRY'">
               <td class="cell-code">
                 <code>{{ item.code }}</code>
+                <div *ngIf="item.fetch_method === 'MANUAL_ENTRY'" class="manual-label">РУЧНОЙ</div>
               </td>
 
               <td class="cell-product">
-                <div class="product-title">{{ item.name }}</div>
+                <div class="product-title" [class.text-muted]="item.fetch_method === 'MANUAL_ENTRY'">{{ item.name }}</div>
                 <div class="product-portion">
                   <span class="badge-portion">{{ item.portion_size }}</span>
                   <span class="category-tag">{{ getCategoryLabel(item.category) }}</span>
+                  <span *ngIf="item.fetch_method === 'AUTO_CRAWL'" class="badge-method-auto">🤖 АВТО</span>
+                  <span *ngIf="item.fetch_method === 'MANUAL_ENTRY'" class="badge-method-manual">📝 ОФФЛАЙН</span>
+                </div>
+                <div *ngIf="item.fetch_method === 'MANUAL_ENTRY'" class="sub-manual-note">
+                  Ручной сбор (оффлайн-меню) • исключено из автоматических тенденций
                 </div>
               </td>
 
@@ -168,9 +198,14 @@ import { FinishedProductBrand, ChannelType, FinishedProductItem } from '../model
               </td>
 
               <td class="cell-delta text-center font-mono">
-                <span [class]="getDeltaClass(item.delta_30d_pct)">
-                  {{ (item.delta_30d_pct || 0) > 0 ? '+' : '' }}{{ item.delta_30d_pct || 0 }}%
-                </span>
+                <ng-container *ngIf="item.fetch_method === 'AUTO_CRAWL'">
+                  <span [class]="getDeltaClass(item.delta_30d_pct)">
+                    {{ (item.delta_30d_pct || 0) > 0 ? '+' : '' }}{{ item.delta_30d_pct || 0 }}%
+                  </span>
+                </ng-container>
+                <ng-container *ngIf="item.fetch_method === 'MANUAL_ENTRY'">
+                  <span class="manual-dash" title="Ручной ввод: исключен из расчета тенденций">—</span>
+                </ng-container>
               </td>
 
               <td class="cell-date text-center font-mono">
@@ -480,7 +515,69 @@ import { FinishedProductBrand, ChannelType, FinishedProductItem } from '../model
     .text-ruby { color: #f87171 !important; }
     .text-gold { color: #f1c40f !important; }
     .text-emerald { color: #2ecc71 !important; }
-  `]
+  
+    .method-pills {
+      display: flex;
+      gap: 3px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 3px;
+    }
+    .pill-auto.active {
+      background: var(--accent-emerald) !important;
+      color: #fff;
+    }
+    .pill-manual.active {
+      background: #64748b !important;
+      color: #fff;
+    }
+    .row-manual {
+      background: rgba(255, 255, 255, 0.012) !important;
+      opacity: 0.72;
+    }
+    .row-manual:hover {
+      opacity: 0.95;
+    }
+    .row-manual td {
+      color: #94a3b8 !important;
+    }
+    .manual-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.4px;
+      margin-top: 2px;
+    }
+    .sub-manual-note {
+      font-size: 0.68rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .badge-method-auto {
+      background: rgba(39, 174, 96, 0.15);
+      color: #2ecc71;
+      border: 1px solid rgba(39, 174, 96, 0.3);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .badge-method-manual {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .manual-dash {
+      color: #64748b;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+`]
 })
 export class FinishedTableComponent {
   svc = inject(MarketMonitorService);
@@ -539,5 +636,12 @@ export class FinishedTableComponent {
   getDeltaClass(val?: number): string {
     if (!val) return 'delta-stable';
     return val > 0 ? 'delta-up' : 'delta-down';
+  }
+  getAutoCount(): number {
+    return this.svc.finishedProducts().filter(i => i.fetch_method === 'AUTO_CRAWL').length;
+  }
+
+  getManualCount(): number {
+    return this.svc.finishedProducts().filter(i => i.fetch_method === 'MANUAL_ENTRY').length;
   }
 }

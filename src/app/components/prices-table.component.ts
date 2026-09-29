@@ -36,6 +36,29 @@ import { RawMaterialItem } from '../models/market-monitor.model';
           <p>Кликните по ссылке для перехода на страницу предложения или нажмите «Лог» для просмотра аудита.</p>
         </div>
         <div class="table-actions">
+          <div class="method-pills">
+            <button 
+              class="pill-btn" 
+              [class.active]="svc.rawMethodFilter() === 'ALL'" 
+              (click)="svc.rawMethodFilter.set('ALL')">
+              Все ({{ svc.rawMaterials().length }})
+            </button>
+            <button 
+              class="pill-btn pill-auto" 
+              [class.active]="svc.rawMethodFilter() === 'AUTO_CRAWL'" 
+              (click)="svc.rawMethodFilter.set('AUTO_CRAWL')"
+              title="Позиции с автоматическим онлайн-парсингом (METRO, Arbuz, Magnum, Kaspi, Satu, Bifi)">
+              🤖 Авто-сбор ({{ getAutoCount() }})
+            </button>
+            <button 
+              class="pill-btn pill-manual" 
+              [class.active]="svc.rawMethodFilter() === 'MANUAL_ENTRY'" 
+              (click)="svc.rawMethodFilter.set('MANUAL_ENTRY')"
+              title="Позиции с ручным сбором данных (Алтын Орда, Зеленый Базар, Оптовка) — исключены из динамики">
+              📝 Ручной ввод ({{ getManualCount() }})
+            </button>
+          </div>
+
           <input
             type="text"
             class="search-input"
@@ -254,7 +277,83 @@ import { RawMaterialItem } from '../models/market-monitor.model';
     .trend-up { color: var(--accent-ruby); font-weight: 700; }
     .trend-down { color: var(--accent-emerald); font-weight: 700; }
     .trend-stable { color: var(--text-muted); }
-  `]
+  
+    .method-pills {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 3px;
+    }
+    .pill-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill-btn.active {
+      background: var(--accent-amber);
+      color: #fff;
+    }
+    .pill-auto.active {
+      background: var(--accent-emerald) !important;
+    }
+    .pill-manual.active {
+      background: #64748b !important;
+    }
+    .row-manual {
+      background: rgba(255, 255, 255, 0.012) !important;
+      opacity: 0.72;
+    }
+    .row-manual:hover {
+      opacity: 0.95;
+    }
+    .row-manual td {
+      color: #94a3b8 !important;
+    }
+    .manual-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.4px;
+      margin-top: 2px;
+    }
+    .sub-manual-note {
+      font-size: 0.68rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .badge-method-auto {
+      background: rgba(39, 174, 96, 0.15);
+      color: #2ecc71;
+      border: 1px solid rgba(39, 174, 96, 0.3);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .badge-method-manual {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .manual-dash {
+      color: #64748b;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .mt-1 { margin-top: 4px; }
+`]
 })
 export class PricesTableComponent {
   svc = inject(MarketMonitorService);
@@ -302,4 +401,11 @@ export class PricesTableComponent {
     await this.svc.resetDatabase();
   }
 
+  getAutoCount(): number {
+    return this.svc.rawMaterials().filter(i => i.fetch_method === 'AUTO_CRAWL').length;
+  }
+
+  getManualCount(): number {
+    return this.svc.rawMaterials().filter(i => i.fetch_method === 'MANUAL_ENTRY').length;
+  }
 }

@@ -13,6 +13,8 @@ import { MarketMonitorService } from '../services/market-monitor.service';
         <div class="chart-title">
           <h2 *ngIf="svc.activeMaterial() as m">
             📈 {{ m.name }} ({{ m.unit }}) — Динамика в Алматы
+            <span *ngIf="m.fetch_method === 'AUTO_CRAWL'" class="badge-auto-chart">🤖 Авто-сбор</span>
+            <span *ngIf="m.fetch_method === 'MANUAL_ENTRY'" class="badge-manual-chart">📝 Ручной ввод (оффлайн)</span>
           </h2>
           <p *ngIf="svc.activeMaterial() as m">
             Текущий коридор: {{ svc.formatMoney(m.market_min_kzt) }} ... {{ svc.formatMoney(m.market_max_kzt) }} • Средняя: {{ svc.formatMoney(m.market_avg_kzt) }}
@@ -98,7 +100,43 @@ import { MarketMonitorService } from '../services/market-monitor.service';
       color: var(--text-secondary);
     }
     .source-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-  `]
+  
+    .badge-auto-chart {
+      background: rgba(39, 174, 96, 0.2);
+      color: #2ecc71;
+      border: 1px solid rgba(39, 174, 96, 0.4);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .badge-manual-chart {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .manual-chart-notice {
+      background: rgba(148, 163, 184, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 0.76rem;
+      color: #94a3b8;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+    .manual-chart-notice strong {
+      color: #cbd5e1;
+    }
+`]
 })
 export class PriceChartComponent implements AfterViewInit {
   @ViewChild('canvasRef') canvasRef!: ElementRef<HTMLCanvasElement>;
