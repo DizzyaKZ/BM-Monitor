@@ -46,6 +46,15 @@ export interface MarketSource {
   type: 'MARKET' | 'HYPERMARKET' | 'ONLINE' | 'SUPPLIER';
   base_url: string;
   description: string;
+  auto_monitor?: boolean;
+  check_interval?: string;
+  target_code?: string;
+  target_name?: string;
+  initial_price_kzt?: number;
+  parser_type?: string;
+  last_crawled_at?: string;
+  last_crawled_price?: number;
+  status?: 'ACTIVE' | 'PAUSED' | 'ERROR';
   [key: string]: any;
 }
 
@@ -174,5 +183,14 @@ export interface CompetitorVenue {
   menu_url: string;
   platform: string;
   notes?: string;
+  auto_monitor?: boolean;
+  check_interval?: string;
+  target_code?: string;
+  target_name?: string;
+  initial_price_kzt?: number;
+  parser_type?: string;
+  last_crawled_at?: string;
+  last_crawled_price?: number;
+  status?: 'ACTIVE' | 'PAUSED' | 'ERROR';
   [key: string]: any;
 }
