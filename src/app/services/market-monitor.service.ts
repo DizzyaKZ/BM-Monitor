@@ -127,6 +127,7 @@ export class MarketMonitorService {
   readonly kpiSummary = computed(() => {
     const items = this.rawMaterials();
     const total = items.length;
+    this.crawlTotalTargetCount.set(total);
     // Исключаем MANUAL_ENTRY (ручной ввод) из расчета тенденций и средней динамики
     const autoItems = items.filter(i => i.fetch_method === 'AUTO_CRAWL');
     const manualCount = items.length - autoItems.length;
@@ -444,6 +445,8 @@ export class MarketMonitorService {
 
   
   // Crawl Progress Signals
+  readonly crawlTargetMode = signal<'BEER' | 'FINISHED' | 'RAW'>('BEER');
+  readonly crawlTotalTargetCount = signal<number>(12);
   readonly isCrawlModalOpen = signal<boolean>(false);
   readonly isCrawling = signal<boolean>(false);
   readonly crawlProgress = signal<number>(0);
@@ -460,6 +463,8 @@ export class MarketMonitorService {
   }
 
   async triggerDailyCrawl(): Promise<number> {
+    this.crawlTargetMode.set('RAW');
+    this.crawlTotalTargetCount.set(this.rawMaterials().length || 43);
     this.isCrawlModalOpen.set(true);
     this.isCrawling.set(true);
     this.crawlProgress.set(0);
@@ -470,6 +475,7 @@ export class MarketMonitorService {
     const items = [...this.rawMaterials()];
     const sources = this.sources();
     const total = items.length;
+    this.crawlTotalTargetCount.set(total);
     const nowTimeStr = () => new Date().toLocaleTimeString('ru-RU');
     const alerts: { code: string; name: string; oldPrice: number; newPrice: number; deltaPct: number }[] = [];
     const newLogs: AcquisitionLog[] = [];
@@ -708,6 +714,7 @@ export class MarketMonitorService {
   readonly beerKpiSummary = computed(() => {
     const items = this.beerItems();
     const total = items.length;
+    this.crawlTotalTargetCount.set(total);
     if (total === 0) {
       return { total: 0, avgCompetitorPrice: 0, avgBeermoodPrice: 0, avgMarginPct: 0, avgAdvantagePct: 0, topMarginItem: null };
     }
@@ -770,6 +777,7 @@ export class MarketMonitorService {
   readonly finishedKpiSummary = computed(() => {
     const items = this.finishedProducts();
     const total = items.length;
+    this.crawlTotalTargetCount.set(total);
     if (!total) {
       return {
         total: 0,
@@ -905,6 +913,7 @@ export class MarketMonitorService {
   // ВЫДЕЛЕННЫЙ АВТОПАРСИНГ ПИВНОЙ КАРТЫ (BEER MONITOR CRAWL)
   // =========================================================================
   async triggerBeerCrawl(): Promise<number> {
+    this.crawlTargetMode.set('BEER');
     this.isCrawlModalOpen.set(true);
     this.isCrawling.set(true);
     this.crawlProgress.set(0);
@@ -912,27 +921,48 @@ export class MarketMonitorService {
     this.crawlConsoleLogs.set([]);
     this.crawlResultSummary.set(null);
 
-    const beerList = [...this.beerItems()];
-    const allProducts = [...this.finishedProducts()];
-    const total = beerList.length;
+    // Гарантия наличия сортов пива (если стейт был пуст или очищен)
+    let beerList = [...this.beerItems()];
+    let allProducts = [...this.finishedProducts()];
+    if (beerList.length === 0) {
+      const fallbackBeers = FALLBACK_FINISHED_PRODUCTS.filter(i => i.category === 'BEER');
+      allProducts = allProducts.length === 0 ? [...FALLBACK_FINISHED_PRODUCTS] : [...allProducts, ...fallbackBeers];
+      this.finishedProducts.set(allProducts);
+      beerList = allProducts.filter(i => i.category === 'BEER');
+    }
+
+    const total = beerList.length || 12;
+    this.crawlTotalTargetCount.set(total);
     const nowTimeStr = () => new Date().toLocaleTimeString('ru-RU');
     const alerts: { code: string; name: string; oldPrice: number; newPrice: number; deltaPct: number }[] = [];
     const newLogs: AcquisitionLog[] = [];
 
-    for (let i = 0; i < total; i++) {
+    // Начальный лог старта
+    this.crawlConsoleLogs.set([{
+      time: nowTimeStr(),
+      code: 'START',
+      name: 'Инициализация парсинга пивной матрицы BEERMOOD.PUB',
+      source: 'Бары и пабы Алматы',
+      price: 0,
+      url: 'https://2gis.kz/almaty',
+      status: 'INIT 200',
+      ms: 15
+    }]);
+
+    for (let i = 0; i < beerList.length; i++) {
       const it = beerList[i];
       const verifiedUrl = it.source_url && it.source_url !== 'нет URL' 
         ? it.source_url 
         : this.findUrlByCode(it.code);
 
-      this.crawlCurrentItem.set(it.name);
+      this.crawlCurrentItem.set(`${it.name} (${it.portion_size})`);
       this.crawlCurrentSource.set(it.competitor_name);
 
-      const variance = (Math.random() - 0.49) * 0.022;
+      const variance = (Math.random() - 0.49) * 0.024;
       const oldPrice = it.competitor_price_kzt;
       const newPrice = Math.round(oldPrice * (1 + variance));
       const delta1d = parseFloat((variance * 100).toFixed(1));
-      const respMs = Math.floor(110 + Math.random() * 180);
+      const respMs = Math.floor(100 + Math.random() * 190);
 
       it.competitor_price_kzt = newPrice;
       it.delta_1d_pct = delta1d;
@@ -941,7 +971,6 @@ export class MarketMonitorService {
       it.last_fetched_at = new Date().toISOString();
       it.status = 'VERIFIED';
 
-      // Обновляем позицию в общем массиве
       const allIdx = allProducts.findIndex(p => p.code === it.code);
       if (allIdx !== -1) {
         allProducts[allIdx] = { ...it };
@@ -990,7 +1019,7 @@ export class MarketMonitorService {
       this.crawlProcessedCount.set(i + 1);
       this.crawlProgress.set(Math.round(((i + 1) / total) * 100));
 
-      await new Promise(r => setTimeout(r, 60));
+      await new Promise(r => setTimeout(r, 75));
     }
 
     this.finishedProducts.set(allProducts);
@@ -1023,6 +1052,7 @@ export class MarketMonitorService {
   }
 
   async triggerFinishedCrawl(): Promise<number> {
+    this.crawlTargetMode.set('FINISHED');
     this.isCrawlModalOpen.set(true);
     this.isCrawling.set(true);
     this.crawlProgress.set(0);
@@ -1032,6 +1062,7 @@ export class MarketMonitorService {
 
     const items = [...this.finishedProducts()];
     const total = items.length;
+    this.crawlTotalTargetCount.set(total);
     const nowTimeStr = () => new Date().toLocaleTimeString('ru-RU');
     const alerts: { code: string; name: string; oldPrice: number; newPrice: number; deltaPct: number }[] = [];
     const newLogs: AcquisitionLog[] = [];

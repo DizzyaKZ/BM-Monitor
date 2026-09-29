@@ -65,7 +65,7 @@ import { MarketMonitorService } from '../services/market-monitor.service';
             <button class="btn btn-primary" (click)="svc.openFinishedEntryModal()">
               ➕ Добавить сорт
             </button>
-            <button class="btn btn-cyan" (click)="onCrawlFinished()">
+            <button class="btn btn-cyan" (click)="onCrawlBeer()">
               🔄 Парсинг пива
             </button>
           </ng-container>
@@ -229,6 +229,10 @@ export class NavbarComponent {
 
   get totalSourcesCount(): number {
     return this.svc.competitorVenues().length + this.svc.sources().length;
+  }
+
+  async onCrawlBeer() {
+    await this.svc.triggerBeerCrawl();
   }
 
   async onCrawlFinished() {

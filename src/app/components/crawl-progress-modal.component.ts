@@ -14,8 +14,13 @@ import { MarketMonitorService } from '../services/market-monitor.service';
           <div class="header-title-box">
             <span class="status-indicator" [class.running]="svc.isCrawling()" [class.done]="!svc.isCrawling()"></span>
             <div>
-              <h3>🔄 Ход выполнения автопарсинга цен (г. Алматы)</h3>
-              <p>Опрос рынков, гипермаркетов, онлайн-площадок и сайтов поставщиков</p>
+              <h3 *ngIf="svc.crawlTargetMode() === 'BEER'">🍺 Ход выполнения автопарсинга пивной карты (BEERMOOD.PUB)</h3>
+              <h3 *ngIf="svc.crawlTargetMode() === 'FINISHED'">🍽️ Ход выполнения автопарсинга кухни и продукции</h3>
+              <h3 *ngIf="svc.crawlTargetMode() === 'RAW'">🔄 Ход выполнения автопарсинга сырья и B2B поставок</h3>
+              
+              <p *ngIf="svc.crawlTargetMode() === 'BEER'">Опрос крафтовых баров, пабов и ботлшопов Алматы (Harat's, Chechil, Dublin, Line Brew, Hophead, Baza Craft)</p>
+              <p *ngIf="svc.crawlTargetMode() === 'FINISHED'">Опрос меню ресторанов, крафтовых лавок и супермаркетов Алматы</p>
+              <p *ngIf="svc.crawlTargetMode() === 'RAW'">Опрос оптовых рынков, гипермаркетов и B2B порталов («Алтын Орда», «Зеленый Базар», METRO, Satu.kz)</p>
             </div>
           </div>
           <button class="close-btn" [disabled]="svc.isCrawling()" (click)="svc.closeCrawlModal()">&times;</button>
@@ -38,7 +43,7 @@ import { MarketMonitorService } from '../services/market-monitor.service';
 
           <div class="progress-meta" *ngIf="svc.isCrawling()">
             <span>Канал: <strong class="text-gold">{{ svc.crawlCurrentSource() }}</strong></span>
-            <span>Обработано позиций: <strong>{{ svc.crawlProcessedCount() }} из {{ svc.rawMaterials().length }}</strong></span>
+            <span>Обработано позиций: <strong>{{ svc.crawlProcessedCount() }} из {{ svc.crawlTotalTargetCount() }}</strong></span>
           </div>
         </div>
 
@@ -71,19 +76,23 @@ import { MarketMonitorService } from '../services/market-monitor.service';
           
           <div class="sum-grid">
             <div class="sum-card">
-              <span class="lbl">Обновлено позиций:</span>
-              <strong>{{ sum.total }} из {{ sum.total }}</strong>
+              <span class="lbl">{{ svc.crawlTargetMode() === 'BEER' ? 'Сортов пива в меню:' : 'Обновлено позиций:' }}</span>
+              <strong class="text-gold">{{ sum.total }} из {{ sum.total }}</strong>
             </div>
             <div class="sum-card">
-              <span class="lbl">Опрошено каналов:</span>
-              <strong class="text-cyan">{{ sum.sourcesCount }} источников</strong>
+              <span class="lbl">{{ svc.crawlTargetMode() === 'BEER' ? 'Опрошено баров Алматы:' : 'Опрошено каналов:' }}</span>
+              <strong class="text-cyan">{{ sum.sourcesCount }} заведений</strong>
             </div>
             <div class="sum-card">
-              <span class="lbl">Записано логов аудита:</span>
-              <strong class="text-emerald">+{{ sum.updatedLogsCount }} записей</strong>
+              <span class="lbl">Записано в аудит цен:</span>
+              <strong class="text-emerald">+{{ sum.updatedLogsCount }} записей с URL</strong>
             </div>
-            <div class="sum-card">
-              <span class="lbl">Динамика корзины:</span>
+            <div class="sum-card" *ngIf="svc.crawlTargetMode() === 'BEER'">
+              <span class="lbl">Ср. маржа пролива:</span>
+              <strong class="text-emerald">{{ svc.beerKpiSummary().avgMarginPct }}%</strong>
+            </div>
+            <div class="sum-card" *ngIf="svc.crawlTargetMode() !== 'BEER'">
+              <span class="lbl">Динамика цен:</span>
               <strong [style.color]="sum.avgBasketDelta > 0 ? 'var(--accent-ruby)' : 'var(--accent-emerald)'">
                 {{ sum.avgBasketDelta > 0 ? '+' : '' }}{{ sum.avgBasketDelta }}%
               </strong>
