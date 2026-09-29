@@ -60,6 +60,10 @@ import { MarketMonitorService } from '../services/market-monitor.service';
             📜 Журнал аудита
           </button>
 
+          <button class="btn btn-outline-amber" (click)="svc.openPdfParserModal()" title="Парсинг удаленных PDF-меню с авто-классификацией позиций">
+            📄 Парсинг PDF меню
+          </button>
+
           <!-- MODE 1: BEER MONITOR ACTIONS -->
           <ng-container *ngIf="svc.activeMode() === 'BEER_MONITOR'">
             <button class="btn btn-primary" (click)="svc.openFinishedEntryModal()">
@@ -195,6 +199,21 @@ import { MarketMonitorService } from '../services/market-monitor.service';
     }
     .btn-outline-cyan:hover {
       background: rgba(0, 180, 216, 0.15);
+      color: #fff;
+    }
+    .btn-outline-amber {
+      background: transparent;
+      border: 1px solid var(--accent-amber);
+      color: var(--accent-amber);
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-outline-amber:hover {
+      background: rgba(245, 158, 11, 0.15);
       color: #fff;
     }
     .btn-rose {

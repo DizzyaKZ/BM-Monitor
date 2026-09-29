@@ -194,3 +194,37 @@ export interface CompetitorVenue {
   status?: 'ACTIVE' | 'PAUSED' | 'ERROR';
   [key: string]: any;
 }
+
+export interface PdfMenuParsedItem {
+  id: string;
+  raw_line: string;
+  item_name: string;
+  portion: string;
+  extracted_price_kzt: number;
+  pdf_category: string;
+  target_code: string;
+  target_name: string;
+  target_type: 'FINISHED_PRODUCT' | 'RAW_MATERIAL' | 'UNMAPPED';
+  match_confidence: number;
+  current_system_price?: number;
+  delta_kzt?: number;
+  delta_pct?: number;
+  selected: boolean;
+  notes?: string;
+  [key: string]: any;
+}
+
+export interface PdfRemoteParseResult {
+  source_url: string;
+  venue_name: string;
+  pdf_file_name: string;
+  file_size_kb: number;
+  pages_count: number;
+  parsed_at: string;
+  http_status: number;
+  response_time_ms: number;
+  total_items_found: number;
+  classified_items_count: number;
+  items: PdfMenuParsedItem[];
+  [key: string]: any;
+}

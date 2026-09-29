@@ -14,6 +14,7 @@ import { FastEntryModalComponent } from './components/fast-entry-modal.component
 import { CrawlProgressModalComponent } from './components/crawl-progress-modal.component';
 import { FinishedEntryModalComponent } from './components/finished-entry-modal.component';
 import { SourcesModalComponent } from './components/sources-modal.component';
+import { PdfMenuParserModalComponent } from './components/pdf-menu-parser-modal.component';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +33,8 @@ import { SourcesModalComponent } from './components/sources-modal.component';
     FastEntryModalComponent,
     CrawlProgressModalComponent,
     FinishedEntryModalComponent,
-    SourcesModalComponent
+    SourcesModalComponent,
+    PdfMenuParserModalComponent
   ],
   template: `
     <div class="app-layout">
@@ -65,6 +67,7 @@ import { SourcesModalComponent } from './components/sources-modal.component';
       <app-crawl-progress-modal></app-crawl-progress-modal>
       <app-finished-entry-modal></app-finished-entry-modal>
       <app-sources-modal></app-sources-modal>
+      <app-pdf-menu-parser-modal></app-pdf-menu-parser-modal>
 
       <footer class="app-footer">
         <div class="container footer-flex">

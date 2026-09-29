@@ -54,6 +54,9 @@ body {
 .btn-outline:hover { border-color: var(--accent-amber); color: var(--accent-amber); background: var(--accent-amber-glow); }
 .btn-emerald { background: var(--accent-emerald-soft); color: var(--accent-emerald); border-color: var(--accent-emerald); }
 .btn-emerald:hover { background: var(--accent-emerald); color: #fff; }
+.btn-amber { background: var(--accent-amber); color: #fff; }
+.btn-outline-amber { background: transparent; color: var(--accent-amber); border: 1px solid var(--accent-amber); }
+.btn-outline-amber:hover { background: rgba(245, 158, 11, 0.15); color: #fff; }
 .btn-cyan { background: var(--accent-cyan-soft); color: var(--accent-cyan); border-color: var(--accent-cyan); }
 .btn-cyan:hover { background: var(--accent-cyan); color: #fff; }
 

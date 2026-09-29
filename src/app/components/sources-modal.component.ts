@@ -48,6 +48,9 @@ import { MarketSource, CompetitorVenue, ChannelType } from '../models/market-mon
           <button class="btn btn-emerald" (click)="isAddingFormOpen = !isAddingFormOpen">
             {{ isAddingFormOpen ? '✕ Скрыть форму' : '➕ Добавить источник' }}
           </button>
+          <button class="btn btn-outline-amber" (click)="svc.openPdfParserModal()" title="Парсинг удаленных PDF-файлов меню и авто-классификация">
+            📄 Парсинг PDF меню
+          </button>
         </div>
 
         <!-- Inline Add Source Form -->
