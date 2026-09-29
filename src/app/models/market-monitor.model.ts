@@ -98,3 +98,71 @@ export interface CrawlSummary {
   alerts: { code: string; name: string; oldPrice: number; newPrice: number; deltaPct: number }[];
   completedAt: string;
 }
+
+// ==========================================
+// ГОТОВАЯ ПРОДУКЦИЯ И КОНКУРЕНТЫ (B2C & HoReCa)
+// ==========================================
+
+export type MonitorMode = 'RAW_MATERIALS' | 'FINISHED_PRODUCTS';
+
+export type FinishedProductBrand = 
+  | 'ALL' 
+  | 'BEERMOOD_PUB' 
+  | 'CHEESY_MOOD' 
+  | 'MEAT_BREAD' 
+  | 'SPICY_MOOD';
+
+export type FinishedProductCategory = 
+  | 'ALL' 
+  | 'BEER' 
+  | 'PUB_FOOD' 
+  | 'CHEESE' 
+  | 'CHARCUTERIE' 
+  | 'BAKERY' 
+  | 'SAUCES';
+
+export type ChannelType = 
+  | 'ALL' 
+  | 'BAR_PUB' 
+  | 'CRAFT_SHOP' 
+  | 'RETAIL_SUPERMARKET' 
+  | 'ARTISAN_BOUTIQUE' 
+  | 'DELIVERY_APP';
+
+export interface FinishedProductItem {
+  id: string;
+  code: string;
+  name: string;
+  brand: FinishedProductBrand;
+  category: FinishedProductCategory;
+  channel_type: ChannelType;
+  portion_size: string;
+  unit: string;
+  competitor_name: string;
+  competitor_price_kzt: number;
+  market_min_kzt: number;
+  market_avg_kzt: number;
+  market_max_kzt: number;
+  target_beermood_price_kzt: number;
+  estimated_cogs_kzt: number;
+  margin_pct?: number;
+  price_advantage_pct?: number;
+  delta_1d_pct: number;
+  delta_30d_pct: number;
+  source_name: string;
+  source_url: string;
+  last_updated: string;
+  last_fetched_at?: string;
+  fetch_method?: string;
+  status: 'VERIFIED' | 'UPDATED' | 'ATTENTION';
+  [key: string]: any;
+}
+
+export interface CompetitorVenue {
+  id: string;
+  name: string;
+  channel_type: ChannelType;
+  address: string;
+  menu_url: string;
+  platform: string;
+}
