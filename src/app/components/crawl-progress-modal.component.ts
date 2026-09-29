@@ -109,6 +109,9 @@ import { MarketMonitorService } from '../services/market-monitor.service';
           <button class="btn btn-outline" [disabled]="svc.isCrawling()" (click)="svc.closeCrawlModal()">
             Закрыть
           </button>
+          <button class="btn btn-cyan" [disabled]="svc.isCrawling()" (click)="onOpenLogsFromModal()">
+            📜 Посмотреть журнал аудита
+          </button>
           <button class="btn btn-emerald" [disabled]="svc.isCrawling()" (click)="onSyncFromModal()">
             🚀 Перенести актуальные цены в Master ERP
           </button>
@@ -307,5 +310,10 @@ export class CrawlProgressModalComponent {
   async onSyncFromModal() {
     await this.svc.syncWithErp();
     this.svc.closeCrawlModal();
+  }
+
+  onOpenLogsFromModal() {
+    this.svc.closeCrawlModal();
+    this.svc.openLogsModal();
   }
 }

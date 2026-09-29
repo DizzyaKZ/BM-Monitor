@@ -431,15 +431,19 @@ export class MarketMonitorService {
       await new Promise(r => setTimeout(r, 45));
     }
 
-    // Persist to local state & try to call backend
+    // Persist to local state & call backend
     this.rawMaterials.set(items);
     localStorage.setItem('bm_monitor_prices', JSON.stringify(items));
-    this.acquisitionLogs.update(l => [...newLogs, ...l]);
+    this.allLogs.update(l => [...newLogs, ...l]);
 
     // Send update to PHP Backend if online
     try {
       await fetch(this.getApiUrl('crawl'), { method: 'POST' });
     } catch (e) {}
+
+    // Immediately re-sync prices & audit logs from backend
+    await this.fetchFromApi();
+    await this.fetchLogsFromApi();
 
     // Set summary
     const deltas = items.map(x => x.delta_1d_pct || 0);
@@ -448,7 +452,7 @@ export class MarketMonitorService {
     this.crawlResultSummary.set({
       total,
       sourcesCount: sources.length,
-      updatedLogsCount: items.length * sources.length,
+      updatedLogsCount: items.filter(x => x.fetch_method === 'AUTO_CRAWL').length,
       avgBasketDelta,
       alerts: alerts.slice(0, 5),
       completedAt: new Date().toLocaleTimeString('ru-RU')
@@ -730,6 +734,7 @@ export class MarketMonitorService {
     const total = items.length;
     const nowTimeStr = () => new Date().toLocaleTimeString('ru-RU');
     const alerts: { code: string; name: string; oldPrice: number; newPrice: number; deltaPct: number }[] = [];
+    const newLogs: AcquisitionLog[] = [];
 
     for (let i = 0; i < total; i++) {
       const it = items[i];
@@ -777,6 +782,25 @@ export class MarketMonitorService {
         ms: respMs
       };
       this.crawlConsoleLogs.update(logs => [logEntry, ...logs]);
+
+      newLogs.unshift({
+        id: `CRAWL-FIN-${it.code}-${Date.now()}-${i}`,
+        date: it.last_updated,
+        timestamp: it.last_fetched_at,
+        code: it.code,
+        item_name: it.name,
+        unit: it.unit,
+        source_id: it.channel_type,
+        source_name: it.competitor_name,
+        price_kzt: newPrice,
+        url: it.source_url,
+        method: 'AUTO_CRAWL',
+        http_status: 200,
+        response_time_ms: respMs,
+        status: 'VERIFIED',
+        notes: `Повторная проверка меню заведения: 200 OK (${it.competitor_name})`
+      });
+
       this.crawlProcessedCount.set(i + 1);
       this.crawlProgress.set(Math.round(((i + 1) / total) * 100));
 
@@ -785,15 +809,20 @@ export class MarketMonitorService {
 
     this.finishedProducts.set(items);
     localStorage.setItem('bm_monitor_finished_products', JSON.stringify(items));
+    this.allLogs.update(l => [...newLogs, ...l]);
 
     try {
       await fetch(this.getApiUrl('crawl_finished'), { method: 'POST' });
     } catch (e) {}
 
+    // Immediately re-sync from backend
+    await this.fetchFinishedProductsFromApi();
+    await this.fetchLogsFromApi();
+
     this.crawlResultSummary.set({
       total,
       sourcesCount: new Set(items.map(i => i.competitor_name)).size,
-      updatedLogsCount: total,
+      updatedLogsCount: items.filter(x => x.fetch_method === 'AUTO_CRAWL').length,
       avgBasketDelta: 0.1,
       alerts: alerts.slice(0, 5),
       completedAt: new Date().toLocaleTimeString('ru-RU')
