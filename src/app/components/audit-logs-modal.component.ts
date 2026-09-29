@@ -69,7 +69,9 @@ import { AcquisitionLog } from '../models/market-monitor.model';
                 <th style="width: 140px;">Время (Timestamp)</th>
                 <th>Продукт / Позиция</th>
                 <th>Источник / Заведение</th>
-                <th style="text-align:right;">Цена (₸)</th>
+                <th style="text-align:right; min-width: 110px;">Старая цена (до прохода)</th>
+                <th style="text-align:right; min-width: 110px;">Новая цена (итог прохода)</th>
+                <th style="text-align:center; min-width: 130px;">Динамика (Δ)</th>
                 <th style="text-align:center;">Метод</th>
                 <th style="text-align:center;">Статус</th>
                 <th>Ссылка на первоисточник</th>
@@ -90,8 +92,16 @@ import { AcquisitionLog } from '../models/market-monitor.model';
                     {{ l.source_name || svc.findSourceNameById(l.source_id) }}
                   </span>
                 </td>
-                <td class="font-mono" style="text-align:right; font-weight:700;" [style.color]="l.method === 'AUTO_CRAWL' ? 'var(--accent-emerald)' : '#94a3b8'">
-                  {{ svc.formatMoney(+l.price_kzt) }}
+                <td class="font-mono text-muted" style="text-align:right; font-size:0.82rem;">
+                  {{ svc.formatMoney(getOldPrice(l)) }}
+                </td>
+                <td class="font-mono" style="text-align:right; font-weight:700; font-size:0.85rem;" [style.color]="getNewPriceColor(l)">
+                  {{ svc.formatMoney(getNewPrice(l)) }}
+                </td>
+                <td style="text-align:center; white-space:nowrap;">
+                  <span class="delta-badge" [ngClass]="getDeltaBadgeClass(l)">
+                    {{ getDeltaDisplay(l) }}
+                  </span>
                 </td>
                 <td style="text-align:center;">
                   <span class="badge" [ngClass]="l.method === 'AUTO_CRAWL' ? 'badge-cyan' : 'badge-manual'">
@@ -150,13 +160,36 @@ import { AcquisitionLog } from '../models/market-monitor.model';
       background: var(--bg-card);
       border: 1px solid var(--border-strong);
       border-radius: 8px;
-      width: 1180px;
-      max-width: 95%;
+      width: 1320px;
+      max-width: 96%;
       max-height: 88vh;
       display: flex;
       flex-direction: column;
       padding: 24px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    }
+    .delta-badge {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .delta-badge-up {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .delta-badge-down {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .delta-badge-stable {
+      background: rgba(148, 163, 184, 0.1);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.2);
     }
     .modal-header {
       display: flex;
@@ -402,5 +435,72 @@ export class AuditLogsModalComponent {
 
   onRestoreLogs() {
     this.svc.restoreDefaultLogs();
+  }
+
+  getOldPrice(l: AcquisitionLog): number {
+    if (l.old_price_kzt !== undefined && l.old_price_kzt !== null && !isNaN(+l.old_price_kzt)) {
+      return +l.old_price_kzt;
+    }
+    const current = +l.price_kzt || 0;
+    if (l.delta_pct) {
+      return Math.round(current / (1 + l.delta_pct / 100));
+    }
+    const rm = this.svc.rawMaterials().find(r => r.code === l.code);
+    if (rm && rm.delta_1d_pct && rm.delta_1d_pct !== 0) {
+      return Math.round(current / (1 + rm.delta_1d_pct / 100));
+    }
+    const fp = this.svc.finishedProducts().find(f => f.code === l.code);
+    if (fp && fp.delta_1d_pct && fp.delta_1d_pct !== 0) {
+      return Math.round(current / (1 + fp.delta_1d_pct / 100));
+    }
+    return current;
+  }
+
+  getNewPrice(l: AcquisitionLog): number {
+    if (l.new_price_kzt !== undefined && l.new_price_kzt !== null && !isNaN(+l.new_price_kzt)) {
+      return +l.new_price_kzt;
+    }
+    return +l.price_kzt || 0;
+  }
+
+  getDeltaKzt(l: AcquisitionLog): number {
+    if (l.delta_kzt !== undefined && l.delta_kzt !== null && !isNaN(+l.delta_kzt)) {
+      return +l.delta_kzt;
+    }
+    return this.getNewPrice(l) - this.getOldPrice(l);
+  }
+
+  getDeltaPct(l: AcquisitionLog): number {
+    if (l.delta_pct !== undefined && l.delta_pct !== null && !isNaN(+l.delta_pct)) {
+      return +l.delta_pct;
+    }
+    const oldP = this.getOldPrice(l);
+    if (oldP <= 0) return 0;
+    return Number((((this.getNewPrice(l) - oldP) / oldP) * 100).toFixed(1));
+  }
+
+  getDeltaDisplay(l: AcquisitionLog): string {
+    const deltaKzt = this.getDeltaKzt(l);
+    const deltaPct = this.getDeltaPct(l);
+    if (deltaKzt > 0) {
+      return `▲ +${deltaKzt.toLocaleString('ru-RU')} ₸ (+${deltaPct}%)`;
+    } else if (deltaKzt < 0) {
+      return `▼ ${deltaKzt.toLocaleString('ru-RU')} ₸ (${deltaPct}%)`;
+    }
+    return '— 0 ₸ (0.0%)';
+  }
+
+  getDeltaBadgeClass(l: AcquisitionLog): string {
+    const delta = this.getDeltaKzt(l);
+    if (delta > 0) return 'delta-badge-up';
+    if (delta < 0) return 'delta-badge-down';
+    return 'delta-badge-stable';
+  }
+
+  getNewPriceColor(l: AcquisitionLog): string {
+    const delta = this.getDeltaKzt(l);
+    if (delta > 0) return '#f87171';
+    if (delta < 0) return '#34d399';
+    return l.method === 'AUTO_CRAWL' ? 'var(--accent-emerald)' : '#e2e8f0';
   }
 }

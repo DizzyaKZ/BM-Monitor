@@ -293,6 +293,10 @@ export class MarketMonitorService {
             item_name: l.item_name || this.findItemNameByCode(l.code),
             source_name: l.source_name || this.findSourceNameById(l.source_id),
             price_kzt: typeof l.price_kzt === 'string' ? parseFloat(l.price_kzt) || 0 : (l.price_kzt || 0),
+            old_price_kzt: l.old_price_kzt != null ? (typeof l.old_price_kzt === 'string' ? parseFloat(l.old_price_kzt) || 0 : l.old_price_kzt) : undefined,
+            new_price_kzt: l.new_price_kzt != null ? (typeof l.new_price_kzt === 'string' ? parseFloat(l.new_price_kzt) || 0 : l.new_price_kzt) : (typeof l.price_kzt === 'string' ? parseFloat(l.price_kzt) || 0 : (l.price_kzt || 0)),
+            delta_kzt: l.delta_kzt != null ? l.delta_kzt : undefined,
+            delta_pct: l.delta_pct != null ? l.delta_pct : undefined,
             url: (!l.url || l.url === 'нет URL' || l.url.trim() === '') ? this.findUrlByCode(l.code) : l.url
           }));
           this.allLogs.set(enriched);
@@ -416,6 +420,10 @@ export class MarketMonitorService {
     if (index === -1) return false;
 
     const target = { ...items[index] };
+    const oldPrice = target.current_cost_kzt || target.market_avg_kzt || entry.price_kzt;
+    const newPrice = entry.price_kzt;
+    const deltaKzt = newPrice - oldPrice;
+    const deltaPct = oldPrice > 0 ? Number((((newPrice - oldPrice) / oldPrice) * 100).toFixed(1)) : 0;
     const nowIso = new Date().toISOString();
     target.market_avg_kzt = entry.price_kzt;
     target.current_cost_kzt = entry.price_kzt;
@@ -440,6 +448,10 @@ export class MarketMonitorService {
       source_id: entry.source_id,
       source_name: srcObj ? srcObj.name : entry.source_id,
       price_kzt: entry.price_kzt,
+      old_price_kzt: oldPrice,
+      new_price_kzt: newPrice,
+      delta_kzt: deltaKzt,
+      delta_pct: deltaPct,
       url: entry.source_url || target.source_url,
       method: 'MANUAL_ENTRY',
       http_status: 200,
@@ -501,6 +513,12 @@ export class MarketMonitorService {
       this.crawlCurrentSource.set(srcName);
 
       const verifiedPrice = it.current_cost_kzt;
+      const oldPrice = it.delta_1d_pct && it.delta_1d_pct !== 0
+        ? Math.round(verifiedPrice / (1 + it.delta_1d_pct / 100))
+        : (it.market_min_kzt && it.market_min_kzt !== verifiedPrice ? it.market_min_kzt : verifiedPrice);
+      const newPrice = verifiedPrice;
+      const deltaKzt = newPrice - oldPrice;
+      const deltaPct = oldPrice > 0 ? Number((((newPrice - oldPrice) / oldPrice) * 100).toFixed(1)) : 0;
       it.last_updated = today;
       it.last_fetched_at = nowIso;
       it.delta_1d_pct = 0.0;
@@ -531,6 +549,10 @@ export class MarketMonitorService {
         source_id: it.best_source || 'supplier',
         source_name: srcName,
         price_kzt: verifiedPrice,
+        old_price_kzt: oldPrice,
+        new_price_kzt: newPrice,
+        delta_kzt: deltaKzt,
+        delta_pct: deltaPct,
         url: it.source_url,
         method: it.fetch_method === 'MANUAL_ENTRY' ? 'MANUAL_ENTRY' : 'AUTO_CRAWL',
         http_status: 200,
@@ -925,6 +947,12 @@ export class MarketMonitorService {
       this.crawlCurrentSource.set(it.competitor_name);
 
       const verifiedPrice = it.competitor_price_kzt;
+      const oldPrice = it.delta_1d_pct && it.delta_1d_pct !== 0
+        ? Math.round(verifiedPrice / (1 + it.delta_1d_pct / 100))
+        : (it.market_min_kzt && it.market_min_kzt !== verifiedPrice ? it.market_min_kzt : verifiedPrice);
+      const newPrice = verifiedPrice;
+      const deltaKzt = newPrice - oldPrice;
+      const deltaPct = oldPrice > 0 ? Number((((newPrice - oldPrice) / oldPrice) * 100).toFixed(1)) : 0;
       it.delta_1d_pct = 0.0;
       it.last_updated = today;
       it.last_fetched_at = nowIso;
@@ -953,6 +981,10 @@ export class MarketMonitorService {
         source_id: it.channel_type || 'BAR_PUB',
         source_name: it.competitor_name,
         price_kzt: verifiedPrice,
+        old_price_kzt: oldPrice,
+        new_price_kzt: newPrice,
+        delta_kzt: deltaKzt,
+        delta_pct: deltaPct,
         url: verifiedUrl,
         method: 'AUTO_CRAWL',
         http_status: 200,
@@ -1014,6 +1046,12 @@ export class MarketMonitorService {
       this.crawlCurrentSource.set(srcName);
 
       const verifiedPrice = it.competitor_price_kzt;
+      const oldPrice = it.delta_1d_pct && it.delta_1d_pct !== 0
+        ? Math.round(verifiedPrice / (1 + it.delta_1d_pct / 100))
+        : (it.market_min_kzt && it.market_min_kzt !== verifiedPrice ? it.market_min_kzt : verifiedPrice);
+      const newPrice = verifiedPrice;
+      const deltaKzt = newPrice - oldPrice;
+      const deltaPct = oldPrice > 0 ? Number((((newPrice - oldPrice) / oldPrice) * 100).toFixed(1)) : 0;
       it.delta_1d_pct = 0.0;
       it.last_updated = today;
       it.last_fetched_at = nowIso;
@@ -1045,6 +1083,10 @@ export class MarketMonitorService {
         source_id: it.channel_type || 'RETAIL',
         source_name: srcName,
         price_kzt: verifiedPrice,
+        old_price_kzt: oldPrice,
+        new_price_kzt: newPrice,
+        delta_kzt: deltaKzt,
+        delta_pct: deltaPct,
         url: it.source_url,
         method: it.fetch_method === 'MANUAL_ENTRY' ? 'MANUAL_ENTRY' : 'AUTO_CRAWL',
         http_status: 200,

@@ -70,6 +70,10 @@ export interface AcquisitionLog {
   source_id: string;
   source_name: string;
   price_kzt: number;
+  old_price_kzt?: number;
+  new_price_kzt?: number;
+  delta_kzt?: number;
+  delta_pct?: number;
   url: string;
   method: FetchMethod;
   http_status: number;
