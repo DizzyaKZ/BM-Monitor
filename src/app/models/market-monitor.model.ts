@@ -100,10 +100,13 @@ export interface CrawlSummary {
 }
 
 // ==========================================
-// ГОТОВАЯ ПРОДУКЦИЯ И КОНКУРЕНТЫ (B2C & HoReCa)
+// РЕЖИМЫ МОНИТОРИНГА
+// 1. BEER_MONITOR: Выделенная пивная карта (крафт, разливное, кеги, COGS бокала)
+// 2. FINISHED_PRODUCTS: Кухня бара, сыры, мясо, выпечка, соусы (B2C & HoReCa)
+// 3. RAW_MATERIALS: Сырьё и ингредиенты (B2B поставки, опт)
 // ==========================================
 
-export type MonitorMode = 'RAW_MATERIALS' | 'FINISHED_PRODUCTS';
+export type MonitorMode = 'BEER_MONITOR' | 'FINISHED_PRODUCTS' | 'RAW_MATERIALS';
 
 export type FinishedProductBrand = 
   | 'ALL' 
@@ -155,6 +158,7 @@ export interface FinishedProductItem {
   last_fetched_at?: string;
   fetch_method?: string;
   status: 'VERIFIED' | 'UPDATED' | 'ATTENTION';
+  beer_style?: string; // Стиль пива: IPA, APA, Stout, Pilsner, Helles, Blanche, Sour, Cider
   [key: string]: any;
 }
 
@@ -165,4 +169,6 @@ export interface CompetitorVenue {
   address: string;
   menu_url: string;
   platform: string;
+  notes?: string;
+  [key: string]: any;
 }
