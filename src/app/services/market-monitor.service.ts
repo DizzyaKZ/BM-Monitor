@@ -127,7 +127,6 @@ export class MarketMonitorService {
   readonly kpiSummary = computed(() => {
     const items = this.rawMaterials();
     const total = items.length;
-    this.crawlTotalTargetCount.set(total);
     // Исключаем MANUAL_ENTRY (ручной ввод) из расчета тенденций и средней динамики
     const autoItems = items.filter(i => i.fetch_method === 'AUTO_CRAWL');
     const manualCount = items.length - autoItems.length;
@@ -164,28 +163,34 @@ export class MarketMonitorService {
   }
 
   private initData() {
-    const cached = localStorage.getItem('bm_monitor_prices');
-    if (cached) {
-      try {
+    let prices = FALLBACK_PRICES;
+    try {
+      const cached = localStorage.getItem('bm_monitor_prices');
+      if (cached) {
         const parsed = JSON.parse(cached);
-        this.rawMaterials.set(parsed.map(sanitizeRawMaterialItem));
-      } catch (e) {
-        this.rawMaterials.set(FALLBACK_PRICES.map(sanitizeRawMaterialItem));
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          prices = parsed;
+        }
       }
-    } else {
-      this.rawMaterials.set(FALLBACK_PRICES.map(sanitizeRawMaterialItem));
-    }
+    } catch (e) {}
+    this.rawMaterials.set(prices.map(sanitizeRawMaterialItem));
 
-    const cachedFin = localStorage.getItem('bm_monitor_finished_products');
-    if (cachedFin) {
-      try {
+    let finished = FALLBACK_FINISHED_PRODUCTS;
+    try {
+      const cachedFin = localStorage.getItem('bm_monitor_finished_products');
+      if (cachedFin) {
         const parsedFin = JSON.parse(cachedFin);
-        this.finishedProducts.set(parsedFin.map(sanitizeFinishedProductItem));
-      } catch (e) {
-        this.finishedProducts.set(FALLBACK_FINISHED_PRODUCTS.map(sanitizeFinishedProductItem));
+        if (Array.isArray(parsedFin) && parsedFin.length > 0) {
+          finished = parsedFin;
+        }
       }
-    } else {
-      this.finishedProducts.set(FALLBACK_FINISHED_PRODUCTS.map(sanitizeFinishedProductItem));
+    } catch (e) {}
+    this.finishedProducts.set(finished.map(sanitizeFinishedProductItem));
+
+    // Защита: гарантируем, что пивная матрица всегда содержит эталонные позиции
+    if (this.beerItems().length === 0) {
+      const fallbackBeers = FALLBACK_FINISHED_PRODUCTS.filter(i => i.category === 'BEER');
+      this.finishedProducts.update(curr => [...curr, ...fallbackBeers]);
     }
 
     this.loadHistory(this.selectedCode(), this.selectedDays());
@@ -446,7 +451,12 @@ export class MarketMonitorService {
   
   // Crawl Progress Signals
   readonly crawlTargetMode = signal<'BEER' | 'FINISHED' | 'RAW'>('BEER');
-  readonly crawlTotalTargetCount = signal<number>(12);
+  readonly crawlTotalTargetCount = computed(() => {
+    const mode = this.crawlTargetMode();
+    if (mode === 'BEER') return this.beerItems().length || 12;
+    if (mode === 'FINISHED') return this.finishedProducts().length || 41;
+    return this.rawMaterials().length || 43;
+  });
   readonly isCrawlModalOpen = signal<boolean>(false);
   readonly isCrawling = signal<boolean>(false);
   readonly crawlProgress = signal<number>(0);
@@ -464,7 +474,7 @@ export class MarketMonitorService {
 
   async triggerDailyCrawl(): Promise<number> {
     this.crawlTargetMode.set('RAW');
-    this.crawlTotalTargetCount.set(this.rawMaterials().length || 43);
+    
     this.isCrawlModalOpen.set(true);
     this.isCrawling.set(true);
     this.crawlProgress.set(0);
@@ -475,7 +485,6 @@ export class MarketMonitorService {
     const items = [...this.rawMaterials()];
     const sources = this.sources();
     const total = items.length;
-    this.crawlTotalTargetCount.set(total);
     const nowTimeStr = () => new Date().toLocaleTimeString('ru-RU');
     const alerts: { code: string; name: string; oldPrice: number; newPrice: number; deltaPct: number }[] = [];
     const newLogs: AcquisitionLog[] = [];
@@ -714,7 +723,6 @@ export class MarketMonitorService {
   readonly beerKpiSummary = computed(() => {
     const items = this.beerItems();
     const total = items.length;
-    this.crawlTotalTargetCount.set(total);
     if (total === 0) {
       return { total: 0, avgCompetitorPrice: 0, avgBeermoodPrice: 0, avgMarginPct: 0, avgAdvantagePct: 0, topMarginItem: null };
     }
@@ -777,7 +785,6 @@ export class MarketMonitorService {
   readonly finishedKpiSummary = computed(() => {
     const items = this.finishedProducts();
     const total = items.length;
-    this.crawlTotalTargetCount.set(total);
     if (!total) {
       return {
         total: 0,
@@ -932,7 +939,6 @@ export class MarketMonitorService {
     }
 
     const total = beerList.length || 12;
-    this.crawlTotalTargetCount.set(total);
     const nowTimeStr = () => new Date().toLocaleTimeString('ru-RU');
     const alerts: { code: string; name: string; oldPrice: number; newPrice: number; deltaPct: number }[] = [];
     const newLogs: AcquisitionLog[] = [];
@@ -1062,7 +1068,6 @@ export class MarketMonitorService {
 
     const items = [...this.finishedProducts()];
     const total = items.length;
-    this.crawlTotalTargetCount.set(total);
     const nowTimeStr = () => new Date().toLocaleTimeString('ru-RU');
     const alerts: { code: string; name: string; oldPrice: number; newPrice: number; deltaPct: number }[] = [];
     const newLogs: AcquisitionLog[] = [];
