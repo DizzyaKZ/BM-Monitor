@@ -55,6 +55,7 @@ import { MarketMonitorService } from '../services/market-monitor.service';
               <span class="t-name">{{ log.name }}</span>
               <span class="t-src text-gold">[{{ log.source }}]</span>
               <span class="t-price font-mono text-emerald font-bold">{{ svc.formatMoney(log.price) }}</span>
+              <a *ngIf="log.url" [href]="log.url" target="_blank" rel="noopener noreferrer" class="badge badge-cyan font-mono" style="text-decoration:none; font-size:0.68rem;" title="Открыть источник цены">🔗 URL ↗</a>
               <span class="t-status badge badge-emerald font-mono">{{ log.status }}</span>
               <span class="t-ms font-mono text-muted">{{ log.ms }}ms</span>
             </div>

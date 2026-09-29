@@ -248,7 +248,7 @@ import { FinishedProductItem } from '../models/market-monitor.model';
                 <td>
                   <div class="source-venue-box">
                     <span class="text-gold" style="font-size:0.8rem; font-weight:600;">{{ item.competitor_name }}</span>
-                    <a *ngIf="item.source_url" [href]="item.source_url" target="_blank" rel="noopener noreferrer" class="source-link" title="Открыть меню бара">
+                    <a [href]="item.source_url || svc.findUrlByCode(item.code)" target="_blank" rel="noopener noreferrer" class="source-link" title="Открыть меню бара в 2GIS / Wolt / Онлайн">
                       🔗 {{ item.source_name || 'Онлайн-меню' }} ↗
                     </a>
                   </div>
@@ -553,7 +553,7 @@ export class BeerMonitorComponent {
   }
 
   onCrawlBeer() {
-    this.svc.triggerFinishedCrawl();
+    this.svc.triggerBeerCrawl();
   }
 
   onAddBeer() {

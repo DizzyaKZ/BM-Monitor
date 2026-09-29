@@ -102,10 +102,9 @@ import { AcquisitionLog } from '../models/market-monitor.model';
                   <span class="badge badge-emerald">✔ 200 OK</span>
                 </td>
                 <td>
-                  <a *ngIf="l.url" [href]="l.url" target="_blank" rel="noopener noreferrer" class="source-link" title="Перейти к опубликованному меню или прайсу">
-                    🔗 {{ getCleanUrlLabel(l.url) }} ↗
+                  <a [href]="l.url || svc.findUrlByCode(l.code)" target="_blank" rel="noopener noreferrer" class="source-link" title="Перейти к опубликованному меню или прайсу">
+                    🔗 {{ getCleanUrlLabel(l.url || svc.findUrlByCode(l.code)) }} ↗
                   </a>
-                  <span *ngIf="!l.url" class="text-muted font-mono" style="font-size:0.72rem;">нет URL</span>
                 </td>
                 <td class="text-muted" style="font-size:0.72rem;">
                   {{ l.notes || 'Верифицировано' }}
@@ -375,19 +374,24 @@ export class AuditLogsModalComponent {
   }
 
   getCleanUrlLabel(url?: string): string {
-    if (!url) return 'нет URL';
+    if (!url || url === 'нет URL') return '2GIS / Онлайн-меню';
+    if (url.includes('9429940000790100')) return "Harat's Pub (2GIS / Wolt)";
+    if (url.includes('9429940000790200')) return 'Dublin Irish Pub (2GIS)';
+    if (url.includes('9429940000790300')) return 'Line Brew / Бочонок (2GIS)';
+    if (url.includes('chechilpub.kz')) return 'Chechil Pub (Онлайн)';
+    if (url.includes('hophead') || url.includes('%D0%BF%D0%B8%D0%B2%D0%BE') || url.includes('крафтовое')) return 'Hophead (2GIS / Craft)';
+    if (url.includes('baza')) return 'Baza Craft Bar (2GIS)';
     if (url.includes('metro-kz.com')) return 'METRO B2B Каталог';
     if (url.includes('magnum.kz')) return 'Magnum Каталог';
     if (url.includes('arbuz.kz')) return 'Arbuz.kz';
     if (url.includes('kaspi.kz')) return 'Kaspi Магазин';
     if (url.includes('satu.kz')) return 'Satu.kz B2B';
     if (url.includes('bifi.kz')) return 'Bifi.kz (Sacco)';
-    if (url.includes('2gis.kz')) return '2GIS Карточка/Меню';
     if (url.includes('wolt.com')) return 'Wolt Меню/Доставка';
-    if (url.includes('chechilpub.kz')) return 'Сайт Chechil Pub';
     if (url.includes('galmart.kz')) return 'Galmart Каталог';
     if (url.includes('colibri.kz')) return 'Colibri Market';
     if (url.includes('primemeat.kz')) return 'Prime Meat';
+    if (url.includes('2gis.kz')) return '2GIS Меню / Карточка';
     return url.length > 30 ? url.substring(0, 30) + '...' : url;
   }
 
